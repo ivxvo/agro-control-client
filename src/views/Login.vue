@@ -1,14 +1,20 @@
 <template>
     <div class="col-md-12">
         <div class="card card-container">
-            <img
+            <!-- <img
                 id="profile-img"
                 src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
                 class="profile-img-card"
-            />
+            /> -->
+            <div class="login-title">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <div class="login-title-text">Киберсофт.Агроконтроль</div>
+            </div>
             <form @submit.prevent="handleLogin">
                 <div class="form-group">
-                    <label for="username">Username</label>
+                    <label for="username">Имя</label>
                     <input
                         type="text"
                         name="username"
@@ -23,15 +29,15 @@
                             Имя обязательно для заполнения
                         </template>
                         <template v-else-if="v$.user.username.minLength.$invalid">
-                            Длина имени не должна быть менее {{ v$.user.username.minLength.$params.min }}
+                            Длина имени не должна быть менее {{ v$.user.username.minLength.$params.min }} символов
                         </template>
                         <template v-else-if="v$.user.username.maxLength.$invalid">
-                            Длина имени не должна превышать {{ v$.user.username.maxLength.$params.max }}
+                            Длина имени не должна превышать {{ v$.user.username.maxLength.$params.max }} символов
                         </template>
                     </div>                    
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Пароль</label>
                     <input
                         type="password"
                         name="password"
@@ -46,17 +52,17 @@
                             Пароль обязателен для заполнения
                         </template>
                         <template v-if="v$.user.password.minLength.$invalid">
-                            Пароль не должен быть менее {{ v$.user.password.minLength.$params.min }}
+                            Пароль не должен быть менее {{ v$.user.password.minLength.$params.min }} символов
                         </template>
                         <template v-if="v$.user.password.maxLength.$invalid">
-                            Пароль не должен превышать {{ v$.user.password.maxLength.$params.max }}
+                            Пароль не должен превышать {{ v$.user.password.maxLength.$params.max }} символов
                         </template>
                     </div>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary btn-block" :disabled="loading">
                         <span v-show="loading" class="spinner-border spinner-border-sm"></span>
-                        <span>Login</span>
+                        <span>Войти</span>
                     </button>
                 </div>
                 <div class="form-group">
@@ -105,6 +111,8 @@ export default {
         }
     },
     created() {
+            console.log(`Logged: ${this.loggedIn}`);
+
         if(this.loggedIn) {
             this.$router.push('/profile');
         }
@@ -129,10 +137,9 @@ export default {
                         },
                         error => {
                             this.loading = false;
-                            this.message =
-                                (error.response && error.response.data) ||
-                                error.message ||
-                                error.toString();
+                            if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.NotFound) {
+                                this.message = `Пользователь '${this.user.username}' не найден.`;
+                            }
                         }
                     )
                 }
@@ -146,24 +153,50 @@ export default {
 label {
   display: block;
   margin-top: 10px;
+  font-weight: 600;
+}
+
+input {
+    background-color: #e6f2ff;
 }
 
 .card-container.card {
-  max-width: 350px !important;
+  max-width: 400px !important;
   padding: 40px 40px;
 }
 
 .card {
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
   padding: 20px 25px 30px;
   margin: 0 auto 25px;
-  margin-top: 50px;
-  -moz-border-radius: 2px;
+  margin-top: 150px;
+  border: none;
+  /* -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   border-radius: 2px;
   -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3); */
+}
+
+.login-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.login-title .logo svg {
+        color: #00b377; /*#009966;*/
+        margin-bottom: 20px;
+        width: 55px;
+        height: 55px;        
+    }
+
+
+.login-title-text {
+    font-size: 2em;
+    padding-bottom: 20px;
+    font-weight: 100;
 }
 
 .profile-img-card {

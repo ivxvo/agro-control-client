@@ -16,6 +16,9 @@ export default {
         };
     },
     mounted() {
+        this.$store.commit("menu/showSidebar", false);
+        console.log(`show: ${this.$store.state.menu.showedSidebar}`);
+
         UserService.getPublicContent().then(
             res => {
                 this.content = res.data;

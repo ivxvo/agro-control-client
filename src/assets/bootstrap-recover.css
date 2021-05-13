@@ -1,0 +1,15 @@
+.btn-primary {
+    color: var(--color-work-area);
+    background-color: var(--color-theme-blue);
+    border-color: var(--color-theme-blue);
+}
+
+.btn-primary:hover {
+    color: var(--color-work-area);
+    background-color: var(--color-theme-dark-blue);
+    border-color: var(--color-theme-dark-blue);
+}
+
+label {
+    font-weight: 600;
+}

@@ -1,0 +1,202 @@
+<template>
+
+    <div class="left-menu"
+        v-tooltip="{
+            'displayArrow': true,
+            theme: {
+            placement: 'right',
+            //width: 'fit-content',
+            'background-color': 'var(--color-gray)',
+            'color': 'var(--color-black)',
+            'font-size': 'var(--tooltip-font-size)'
+        }
+    }"
+    >
+        <div class="logo" v-tooltip="'Начальная страница'">
+            <router-link to="/">
+                <i class="fas fa-seedling"></i>
+            </router-link>
+        </div>
+        <div class="menu-items">
+            <ul>
+                <li v-for="item in items"
+                    :key="item.name"
+                    :id="item.name"
+                    :v-tooltip="item.tooltip"
+                    :class="{ active: item.path == currentPath }"
+                >
+                    <router-link :to="item.path">
+                        <i :class="item.img"></i>
+                    </router-link>
+                </li>
+            </ul>
+        </div>
+        <div class="logout">
+            <ul>
+                <li v-tooltip="'Выйти из системы'">
+                    <router-link to="/login" @click="logout()">
+                        <i class="fas fa-power-off"></i>
+                    </router-link>
+                </li>
+            </ul>
+        </div>            
+    </div>
+
+</template>
+
+<script>
+
+export default {
+    name: "MainMenu",   
+    data() {
+        return {
+            selected: null,
+            items:[
+                {
+                    name: "adminMenuItem",
+                    tooltip: "Администрирование",
+                    path: "/users",
+                    img: "fas fa-user-secret"                    
+                },
+                {
+                    name: "cropRotationMenuItem",
+                    tooltip: "Севооборот",
+                    path: "/crop-rotation",
+                    img: "fas fa-crop-alt"                    
+                },
+                
+            ]
+        }
+    },
+    computed: {
+        loggedIn() {
+            return this.$store.state.auth.status.loggedIn;
+        },
+        currentPath() {
+            return "/" + this.$route.path.split("/")[1];            
+        }
+    },
+    methods: {
+        logout() {
+            this.$store.dispatch("auth/logout");
+            this.deselect();           
+
+            // this.$router.push("/login");
+        }
+    }
+}
+</script>
+
+<style scoped>
+    .left-menu {       
+        background: #fff;
+        width: 70px;
+        height: 100vh;
+        padding: 3px 5px;
+        text-align: center;
+        font-size: 16px;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        user-select: none;
+    }
+
+    .left-menu .logout {
+        width: 70px;
+        padding: 2px;
+        position: fixed;
+        bottom: 0;
+        left: 0;        
+        /* font-size: 18px; */
+    }
+
+    /* .left-menu .logout ul {
+        
+    } */
+
+    .left-menu .menu-items ul,
+    .left-menu .logout ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .left-menu .menu-items ul li,
+    .left-menu .logout ul li {
+        margin: 0;
+        display: inline-block;
+        /* position: relative; */
+    }
+
+    .left-menu .menu-items li.active a {
+        background: var(--color-light-blue);
+        color: var(--color-theme);
+    }
+
+    .left-menu .menu-items li.active a:hover {
+        background: var(--color-light-blue);
+        color: var(--color-theme);
+    }
+
+    .left-menu .menu-items a,
+    .left-menu .logout a {
+        padding: 5px 3px;
+        width: 45px;
+        height: 45px;
+        border-radius: 25px;
+        display: inline-block;
+        background: #fff;
+        color: var(--color-dark-gray);
+        transition: all .15s ease-in-out;
+        font-size: 20px;
+    }
+
+    .left-menu .menu-items li a:hover,
+    .left-menu .logout li a:hover {
+        background: var(--color-gray);
+        color: var(--color-black);
+    }
+
+    .left-menu .menu-items li a svg,
+    .left-menu .logout li a svg {
+        transform: scale(1);
+        position: relative;
+        left: 1px;
+        top: 0px;
+        vertical-align: middle;
+    }
+
+    .left-menu .menu-items li a:hover svg,
+    .left-menu .logout li a:hover svg {
+        transform: scale(1.2);
+    }
+
+    /* .left-menu .menu-items li a */
+
+    .logo {
+        width: 60px;
+        height: 70px;
+    }       
+
+    .left-menu .logo svg {
+        color: var(--color-theme); /*#009966;*/
+
+        width: 55px;
+        height: 55px;
+        vertical-align: middle;
+        object-fit: contain;
+        padding: 7px 0;
+        margin-bottom: 15px;
+        transform: scale(1);
+        transition: all 220ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .left-menu .logo svg:hover {
+        transform: scale(1.2);
+    }
+
+    .left-menu .menu-items {
+        height: calc(100vh - 150px);
+    }
+
+</style>

@@ -1,0 +1,48 @@
+/* https://www.w3schools.com/colors/colors_picker.asp */
+:root {
+--color-black: #424242;
+--color-light-gray: #f0f3f7; /*#f7f7f8;*/
+--color-ultra-light-blue: #f7fafc;
+--color-light-blue: #f0f7ff;
+--color-dark-gray: #9ba6b2;
+--color-gray: #dce0e6;
+--color-theme: #00b377; /* #009999; /*#3399ff;*/ /*#6699ff;*/
+--color-theme-blue: #3399ff;
+--color-theme-dark-blue: #0080ff;
+--color-ultra-light-gray: #fafcff;
+--color-success: #9ece69;
+--color-danger: #dc3545;
+--color-work-area: #fff;
+--color-secondary-text: #989a9e;
+--tooltip-font-size: 12px;
+}
+
+html {
+    font-size: 12px;
+
+}
+
+body {
+    /* font-family: "Open Sans", sans-serif; */
+    color: var(--color-black);
+    background: var(--color-work-area);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+}
+
+::selection {
+    background: var(--color-theme);
+    color: var(--color-work-area);
+}
+
+::-moz-selection {
+    background: var(--color-theme);
+    color: var(--color-work-area);
+}

@@ -12,12 +12,24 @@ class UserService {
         return axios.get(API_URL + "user", { headers: authHeader() });
     }
 
+    getUsers() {
+        return axios.get(API_URL + `users`, { headers: authHeader() });        
+    }
+
     getModeratorBoard() {
         return axios.get(API_URL + "mod", { headers: authHeader() });
     }
 
     getAdminBoard() {
         return axios.get(API_URL + "admin", { headers: authHeader() });
+    }
+
+    getUser(id) {
+        return axios.get(API_URL + `user/${id}`, { headers: authHeader() });
+    }
+
+    updateUser(id, data) {
+        return axios.put(API_URL + `user/${id}`, data, { headers: authHeader() });
     }
 }
 

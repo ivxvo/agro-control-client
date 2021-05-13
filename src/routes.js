@@ -27,6 +27,7 @@ export const routes = [
     },
     {
         path: "/login",
+        name: "login",
         component: () => import("./views/Login.vue")
     },
     {
@@ -42,11 +43,11 @@ export const routes = [
         name: "profile",
         component: () => import("./views/Profile.vue")
     },
-    {
-        path: "/admin",
-        name: "admin",
-        component: () => import("./views/BoardAdmin.vue")
-    },
+    // {
+    //     path: "/admin",
+    //     name: "admin",
+    //     component: () => import("./views/BoardAdmin.vue")
+    // },
     {
         path: "/mod",
         name: "moderator",
@@ -56,5 +57,15 @@ export const routes = [
         path: "/user",
         name: "user",
         component: () => import("./views/BoardUser.vue")
-    }
+    },
+    {
+        path: "/users",
+        name: "users",
+        component: () => import("./views/Users.vue")
+    },
+    {
+        path: "/users/:id",
+        name: "user-details",
+        component: () => import("./views/EditUser.vue")
+    },
 ];
