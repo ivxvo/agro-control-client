@@ -1,4 +1,5 @@
 import axios from "axios";
+import { authHeader } from "./auth-header";
 
 const API_URL = "http://localhost:8080/api/auth/";
 
@@ -28,6 +29,10 @@ class AuthService {
             email: user.email,
             password: user.password
         });
+    }
+
+    verify() {
+        return axios.post(API_URL + "verify", null, { headers: authHeader() });
     }
 }
 

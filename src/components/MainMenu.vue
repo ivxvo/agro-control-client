@@ -79,7 +79,7 @@ export default {
     methods: {
         logout() {
             this.$store.dispatch("auth/logout");
-            this.deselect();           
+            // this.deselect();           
 
             // this.$router.push("/login");
         }

@@ -139,6 +139,8 @@ export default {
                             this.loading = false;
                             if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.NotFound) {
                                 this.message = `Пользователь '${this.user.username}' не найден.`;
+                            } else {
+                                this.message = error.response.data.message;
                             }
                         }
                     )

@@ -107,12 +107,6 @@ export default {
     mounted() {
         this.message = "";
         this.getUser(this.$route.params.id);
-            console.log(`userId0: ${this.$route.params.id}`);
-
-    },
-    beforeCreate() {
-            console.log(`userId0: ${this.$route.params.id}`);
-
     }
 }
 </script>

@@ -18,9 +18,10 @@
             {{currentUser.email}}
         </p>
         <strong>Authorities:</strong>
-        <ul>
-            <li v-for="(role, index) in currentUser.roles" :key="index">{{role}}</li>
-        </ul>
+        <p>
+            <!-- <li v-for="(role, index) in currentUser.roles" :key="index">{{role}}</li> -->
+            {{ currentUser.role }}
+        </p>
     </div>
 </template>
 
@@ -33,6 +34,7 @@ export default {
         }
     },
     mounted() {
+        console.log(localStorage.getItem("user"));
         if(!this.currentUser) {
             this.$router.push("/login");
         }
