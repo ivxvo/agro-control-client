@@ -76,21 +76,20 @@ export default {
             UserService.getUsers().then(
                 res => {
                     users.value = res.data;
-                    console.log(`user: ${JSON.stringify(users.value)}`);
-                },
-                error => {
-                    let err =
-                        (error.response && error.response.data) ||
-                        error.message ||
-                        error.toString(); 
-                    console.log(err);
-                    // console.error(JSON.stringify(error));
-                    //////////////////////////////////////////////////////////
-                    if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unathorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }
                 }
+                // error => {
+                //     let err =
+                //         (error.response && error.response.data) ||
+                //         error.message ||
+                //         error.toString(); 
+                //     console.log(err);
+                //     // console.error(JSON.stringify(error));
+                //     //////////////////////////////////////////////////////////
+                //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unathorized) {
+                //         this.$store.dispatch("auth/logout");
+                //         this.$router.push({ name: "login" });
+                //     }
+                // }
             )
         });
 

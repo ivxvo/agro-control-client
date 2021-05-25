@@ -34,7 +34,6 @@ export default {
         }
     },
     mounted() {
-        console.log(localStorage.getItem("user"));
         if(!this.currentUser) {
             this.$router.push("/login");
         }

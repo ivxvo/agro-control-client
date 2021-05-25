@@ -111,8 +111,6 @@ export default {
         }
     },
     created() {
-            console.log(`Logged: ${this.loggedIn}`);
-
         if(this.loggedIn) {
             this.$router.push('/profile');
         }

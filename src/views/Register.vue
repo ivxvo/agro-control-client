@@ -6,7 +6,7 @@
             <div class="edit-form">
                 <h4>Добавление пользователя</h4>
                 <form>
-                    <div v-if="!successful">
+                    <div>
                         <div class="form-group">
                             <label for="username">Имя</label>
                             <input
@@ -68,17 +68,17 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button class="btn btn-primary">Добавить</button>
+                            <button class="btn btn-primary" @click="handleRegister">Добавить</button>
                         </div>
                     </div>
                 </form>
             </div>           
 
-            <div
+            <!-- <div
                 v-if="message"
                 class="alert"
                 :class="successful ? 'alert-success' : 'alert-danger'"
-            >{{message}}</div>
+            >{{message}}</div> -->
         </div>
     </div>
 </template>
@@ -116,22 +116,30 @@ export default {
     },    
     methods: {
         handleRegister() {
-            this.message = "";
+            // this.message = "";
 
             this.v$.$touch();
             if(this.v$.$error) return;
 
             this.$store.dispatch("auth/register", this.user).then(
-                data => {
-                    this.message = data.message;
-                    this.successful = true;
+                () => {
+                    // this.message = data.message;
+                    // this.successful = true;
+                    console.log("user saved");
+
+                    this.$router.push({ name: "users" });
                 },
                 error => {
-                    this.message =
-                        (error.response && error.response.data) ||
-                        error.message ||
-                        error.toString();
-                    this.successful = false;
+                    // this.message =
+                    //     (error.response && error.response.data) ||
+                    //     error.message ||
+                    //     error.toString();
+                    // this.successful = false;
+                    console.log(error);
+                    if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unathorized) {
+                        this.$store.dispatch("auth/logout");
+                        this.$router.push({ name: "login" });
+                    }
                 }
             );           
         }

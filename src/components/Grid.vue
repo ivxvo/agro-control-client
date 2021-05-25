@@ -30,12 +30,44 @@
 </template>
 
 <script>
+import { reactive, toRefs } from 'vue'
 
-export default({
+export default {
+    name: "Grid",
     props: {
         data: Array,
         columns: Array
+    },
+    setup(props) {
+        const { columns } = toRefs(props);
+        const sortOrders = reactive({});
+        columns.value.forEach(col => sortOrders[col] = 1);
+
+        const sortBy = (col) => {
+            sortOrders[col] = sortOrders[col] * -1;
+        };
+
+        return {
+            sortOrders,
+            sortBy
+        }
     }
     
-})
+}
 </script>
+
+<style scoped>
+    table {
+        border: none;
+
+    }
+
+    th {
+        cursor: pointer;
+    }
+
+    th, td {
+        min-width: 120px;
+        padding: 10px 20px;
+    }
+</style>

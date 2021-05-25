@@ -1,6 +1,6 @@
 const constants = {
     httpStatus: {
-        Unathorized: 401,
+        Unauthorized: 401,
         NotFound: 404,
         ServerError: 500
     }
