@@ -1,11 +1,15 @@
 <template>
-   
+   <Sidebar
+        :header="sidebar.header"
+        :backward="sidebar.backward"
+        :items="sidebar.items"
+    ></Sidebar>
 
     <div class="main-container">
         <div class="container-fluid">
             <div class="edit-form">
                 <h4>Добавление пользователя</h4>
-                <form>
+                <form @submit.prevent="handleRegister">
                     <div>
                         <div class="form-group">
                             <label for="username">Имя</label>
@@ -68,7 +72,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button class="btn btn-primary" @click="handleRegister">Добавить</button>
+                            <button class="btn btn-primary">Добавить</button>
                         </div>
                     </div>
                 </form>
@@ -89,11 +93,48 @@ import useVuelidate from "@vuelidate/core";
 import { required, email as pattern, minLength, maxLength } from "@vuelidate/validators";
 
 import User from "../models/user";
+import AuthService from "../services/auth.service";
+import Sidebar from "../components/Sidebar";
 
 export default {
     name: "Register",
+    components: {
+        Sidebar
+    },
     setup() {
-        return { v$: useVuelidate() }
+        const sidebar = {
+            header: {       
+                name: "addUserSidebarHeader",             
+                text: "Пользователь",
+                description: "Добавление пользователя"
+            },
+            backward: {       
+                    name: "addUserSidebarBackward",             
+                    text: "Все пользователи",
+                    img: ["fas", "angle-left"],
+                    path: "/users"
+            }
+            ,
+            items: null
+            // [                                
+            //     {
+            //         name: "addUserSidebarItem",
+            //         text: "Добавить пользователя",
+            //         img: "fas fa-user-plus",
+            //         path: "/register",
+            //         parent: "adminMenuItem"
+            //     },
+            //     {
+            //         name: "rolesSidebarItem",
+            //         text: "Роли",
+            //         img: "fas fa-user-tag",
+            //         path: "",
+            //         parent: "adminMenuItem"                    
+            //     }
+            // ]
+        }
+
+        return { v$: useVuelidate(), sidebar }
     },
     data() {        
         return {
@@ -121,11 +162,15 @@ export default {
             this.v$.$touch();
             if(this.v$.$error) return;
 
-            this.$store.dispatch("auth/register", this.user).then(
-                () => {
+            // this.$store.dispatch("auth/register", this.user).then(
+                AuthService.register(this.user).then(
+                res => {
                     // this.message = data.message;
                     // this.successful = true;
-                    console.log("user saved");
+                    console.log(res.data.message);
+                    // if(res.data.result === this.ReqResult.error) {
+
+                    // }
 
                     this.$router.push({ name: "users" });
                 },
@@ -135,8 +180,9 @@ export default {
                     //     error.message ||
                     //     error.toString();
                     // this.successful = false;
-                    console.log(error);
-                    if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unathorized) {
+                    console.log(error.response);
+
+                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }

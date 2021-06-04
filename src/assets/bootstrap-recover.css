@@ -13,3 +13,22 @@
 label {
     font-weight: 600;
 }
+
+a {
+    color: var(--color-black);
+}
+
+a:hover {
+    color: var(--color-theme)
+}
+
+.btn-outline-primary {
+    color: var(--color-theme);
+    border-color: var(--color-theme);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--color-theme);
+    border-color: var(--color-theme);
+}

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { authHeader } from "./auth-header";
 
-const API_URL = "http://localhost:8080/api/test/";
+const API_URL = "http://localhost:8080/api/";
 
 class UserService {
     // getPublicContent() {
@@ -12,8 +12,8 @@ class UserService {
     //     return axios.get(API_URL + "user", { headers: authHeader() });
     // }
 
-    getUsers() {
-        return axios.get(API_URL + `users`, { headers: authHeader() })            
+    getUsers(params) {
+        return axios.get(API_URL + `users`, { params, headers: authHeader() })            
             .catch(error => {
                 if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
                     this.$store.dispatch("auth/logout");

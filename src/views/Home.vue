@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import UserService from "../services/user.service";
+// import UserService from "../services/user.service";
 export default {
     name: "Home",
     data() {
@@ -16,19 +16,19 @@ export default {
         };
     },
     mounted() {
-        this.$store.commit("menu/showSidebar", false);
-        console.log(`show: ${this.$store.state.menu.showedSidebar}`);
+        // this.$store.commit("menu/showSidebar", false);
+        // console.log(`show: ${this.$store.state.menu.showedSidebar}`);
 
-        UserService.getPublicContent().then(
-            res => {
-                this.content = res.data;
-            },
-            error => {
-                this.content = (error.response && error.response.data) ||
-                error.message ||
-                error.toString();
-            }
-        );
+        // UserService.getPublicContent().then(
+        //     res => {
+        //         this.content = res.data;
+        //     },
+        //     error => {
+        //         this.content = (error.response && error.response.data) ||
+        //         error.message ||
+        //         error.toString();
+        //     }
+        // );
     }
 };
 </script>

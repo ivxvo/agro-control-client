@@ -19,40 +19,51 @@
                 }
             }"
         >
-            <Grid
-                :data="users"
-                :columns="columns"
-            >
-                <!-- <template v-slot:colLink="user">
-                     <div v-tooltip="'Редактировать'">
-                        <router-link :to="'/users/' + user.row.id">
-                            <i class="fas fa-pen-square"></i>                        
-                        </router-link>
-                    </div>
-                </template>
-                <template v-slot:colButton="user">
-                    <button>{{ user.row.id }}</button>
-                </template> -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="pb-2">Список пользователей</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <Grid
+                        :data="users"
+                        :pages="pages"
+                        :handlePageChange="getUsers"
+                        :columns="columns"                        
+                    >
+                        <!-- <template v-slot:colLink="user">
+                            <div v-tooltip="'Редактировать'">
+                                <router-link :to="'/users/' + user.row.id">
+                                    <i class="fas fa-pen-square"></i>                        
+                                </router-link>
+                            </div>
+                        </template>
+                        <template v-slot:colButton="user">
+                            <button>{{ user.row.id }}</button>
+                        </template> -->
 
-                <template v-slot:id="user">
-                    {{ user.row.id }}
-                </template>
-                <template v-slot:username="user">
-                    {{ user.row.username }}
-                </template>
-                <template v-slot:email="user">
-                    {{ user.row.email }}
-                </template>
-                <template v-slot:role="user">
-                    {{ user.row.Role.name }}
-                </template>
-                <template v-slot:editUser="user">
-                    <router-link :to="'/users/' + user.row.id">
-                        <i class="fas fa-pen-square"></i>                        
-                    </router-link>
-                </template>
+                        <template v-slot:id="user">
+                            {{ user.row.id }}
+                        </template>
+                        <template v-slot:username="user">
+                            {{ user.row.username }}
+                        </template>
+                        <template v-slot:email="user">
+                            {{ user.row.email }}
+                        </template>
+                        <template v-slot:role="user">
+                            {{ user.row.Role.name }}
+                        </template>
+                        <template v-slot:editUser="user">
+                            <router-link class="btn btn-outline-primary btn-sm" :to="'/users/' + user.row.id">
+                                <font-awesome-icon :icon="['fas', 'pen']"/>                        
+                            </router-link>
+                        </template>
 
-            </Grid>
+                    </Grid>
+                </div>
+            </div>
         </div>
     </div>    
 </template>
@@ -61,7 +72,7 @@
 import UserService from "../services/user.service";
 import Grid from "../components/Grid";
 import Sidebar from "../components/Sidebar";
-import { ref, onMounted } from 'vue';
+import { onMounted, reactive } from 'vue';
 
 export default {
     name: "Users",
@@ -70,12 +81,38 @@ export default {
         Sidebar
     },
     setup() {
-        const users = ref();
+        const users = reactive({});
+        const pages = reactive({});
+        const initialPaging = {
+            filter: null,
+            page: 1,
+            size: 4
+        };
 
         onMounted(() => {
-            UserService.getUsers().then(
+            getUsers(initialPaging);
+        });       
+
+        const getUsers = (paging) => {
+            UserService.getUsers(paging).then(
                 res => {
-                    users.value = res.data;
+                    users.countAll = res.data.countAll;
+                    users.pagingItems = res.data.pagingItems;
+                    pages.count = res.data.countPages;
+                    pages.current = res.data.currentPage;
+                },
+                error => {
+                    // this.message =
+                    //     (error.response && error.response.data) ||
+                    //     error.message ||
+                    //     error.toString();
+                    // this.successful = false;
+                    console.log(error.response);
+
+                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        this.$store.dispatch("auth/logout");
+                        this.$router.push({ name: "login" });
+                    }
                 }
                 // error => {
                 //     let err =
@@ -91,7 +128,7 @@ export default {
                 //     }
                 // }
             )
-        });
+        };
 
         const sidebar = {
             header: {       
@@ -111,14 +148,14 @@ export default {
                 {
                     name: "addUserSidebarItem",
                     text: "Добавить пользователя",
-                    img: "fas fa-user-plus",
-                    path: "/register",
+                    img: ["fas", "user-plus"],
+                    path: "/users/register",
                     parent: "adminMenuItem"
                 },
                 {
                     name: "rolesSidebarItem",
                     text: "Роли",
-                    img: "fas fa-user-tag",
+                    img: ["fas", "user-tag"],
                     path: "",
                     parent: "adminMenuItem"                    
                 }
@@ -153,7 +190,7 @@ export default {
                 // }
             ]
 
-        return { users, columns, sidebar }
+        return { users, pages, columns, sidebar, getUsers }
     }
     // data() {
     //     return {

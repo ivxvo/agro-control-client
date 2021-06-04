@@ -8,7 +8,7 @@
             /> -->
             <div class="login-title">
                 <div class="logo">
-                    <i class="fas fa-seedling"></i>
+                    <font-awesome-icon :icon="['fas', 'seedling']"/>
                 </div>
                 <div class="login-title-text">Киберсофт.Агроконтроль</div>
             </div>

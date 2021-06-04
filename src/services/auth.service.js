@@ -28,13 +28,8 @@ class AuthService {
             username: user.username,
             email: user.email,
             password: user.password
-        })
-        .catch(error => {
-            if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
-                this.$store.dispatch("auth/logout");
-                this.$router.push({ name: "login" });
-            }
-        });
+        },
+        { headers: authHeader() })        
     }
 
     verify() {

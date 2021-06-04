@@ -1,4 +1,10 @@
 <template>
+    <Sidebar
+        :header="sidebar.header"
+        :backward="sidebar.backward"
+        :items="sidebar.items"
+    ></Sidebar>
+
     <div class="main-container">
         <div class="container-fluid">
             <div class="edit-form">
@@ -26,7 +32,7 @@
                 <button class="badge badge-primary mr-2" v-else @click="updatePublished(true)">Publish</button> -->
                 <!-- <button class="badge badge-danger mr-2" @click="deleteUser">Удалить</button> -->
                 <button class="btn btn-primary" @click="updateUser">
-                    <i class="far fa-save"></i>
+                    <font-awesome-icon :icon="['fas', 'save']"/>
                     Сохранить</button>
                 <p>{{ message }}</p>
             </div>            
@@ -38,8 +44,48 @@
 import UserService from "../services/user.service";
 import User from "../models/user";
 
+import Sidebar from "../components/Sidebar";
+
 export default {
     name: "EditUser",
+    components: {
+        Sidebar
+    },
+    setup() {
+        const sidebar = {
+            header: {       
+                name: "addUserSidebarHeader",             
+                text: "Пользователь",
+                description: "Редактирование пользователя"
+            },
+            backward: {       
+                    name: "addUserSidebarBackward",             
+                    text: "Все пользователи",
+                    img: ["fas", "angle-left"],
+                    path: "/users"
+            }
+            ,
+            items: null
+            // [                                
+            //     {
+            //         name: "addUserSidebarItem",
+            //         text: "Добавить пользователя",
+            //         img: "fas fa-user-plus",
+            //         path: "/register",
+            //         parent: "adminMenuItem"
+            //     },
+            //     {
+            //         name: "rolesSidebarItem",
+            //         text: "Роли",
+            //         img: "fas fa-user-tag",
+            //         path: "",
+            //         parent: "adminMenuItem"                    
+            //     }
+            // ]
+        }
+
+        return { sidebar }
+    },
     data() {
         return {
             currentUser: new User(),

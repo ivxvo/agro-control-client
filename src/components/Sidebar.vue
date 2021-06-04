@@ -5,10 +5,10 @@
             @click="toggleSidebar"
     >
         <span v-show="showed" v-tooltip="'Свернуть меню'">
-            <i class="fas fa-angle-left"></i>
+            <font-awesome-icon :icon="['fas', 'angle-left']"/>
         </span>
         <span v-show="!showed" v-tooltip="'Развернуть меню'">
-            <i class="fas fa-angle-right"></i>
+            <font-awesome-icon :icon="['fas', 'angle-right']"/>
         </span>
     </button>
 
@@ -17,15 +17,15 @@
             <h4>{{ header.text }}</h4>
             <p>{{ header.description }}</p>
             <div v-if="backward != null">
-                <hr>
                 <router-link
                     :to="backward.path"
                     class="list-group-item list-group-item-action"
                 >
-                    <i class="fas fa-angle-left"></i>
+                    <font-awesome-icon :icon="['fas', 'angle-left']"/>
                     {{ backward.text }}
                 </router-link>
             </div>
+            <hr v-show="backward != null && items != null">
             <div>
                 <ul class="list-group">
                     <li v-for="item in items"
@@ -36,7 +36,7 @@
                             :to="item.path"
                             class="list-group-item list-group-item-action"                            
                         >
-                            <i :class="item.img"></i>
+                            <font-awesome-icon :icon="item.img"/>
                             {{ item.text }}
                         </router-link>
                     </li>

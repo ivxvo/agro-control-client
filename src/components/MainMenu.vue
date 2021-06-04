@@ -14,7 +14,7 @@
     >
         <div class="logo" v-tooltip="'Начальная страница'">
             <router-link to="/">
-                <i class="fas fa-seedling"></i>
+                <font-awesome-icon :icon="['fas', 'seedling']"/>
             </router-link>
         </div>
         <div class="menu-items">
@@ -26,7 +26,7 @@
                     :class="{ active: item.path == currentPath }"
                 >
                     <router-link :to="item.path">
-                        <i :class="item.img"></i>
+                        <font-awesome-icon :icon="item.img"/>
                     </router-link>
                 </li>
             </ul>
@@ -35,7 +35,7 @@
             <ul>
                 <li v-tooltip="'Выйти из системы'">
                     <router-link to="/login" @click="logout()">
-                        <i class="fas fa-power-off"></i>
+                        <font-awesome-icon :icon="['fas', 'power-off']"/>
                     </router-link>
                 </li>
             </ul>
@@ -56,13 +56,13 @@ export default {
                     name: "adminMenuItem",
                     tooltip: "Администрирование",
                     path: "/users",
-                    img: "fas fa-user-secret"                    
+                    img: ["fas", "user-secret"]
                 },
                 {
                     name: "cropRotationMenuItem",
                     tooltip: "Севооборот",
                     path: "/crop-rotation",
-                    img: "fas fa-crop-alt"                    
+                    img: ["fas", "crop-alt"]
                 },
                 
             ]
