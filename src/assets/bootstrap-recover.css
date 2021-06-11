@@ -10,6 +10,27 @@
     border-color: var(--color-theme-dark-blue);
 }
 
+.btn-primary:focus, .btn-primary.focus {
+    box-shadow: 0 0 0 0.2rem rgb(0 153 230 / 50%);
+    background-color: var(--color-theme-blue);
+    border-color: var(--color-theme-dark-blue);
+}
+
+.btn-primary:not(:disabled):not(.disabled).active,
+.btn-primary:not(:disabled):not(.disabled):active,
+.show>.btn-primary.dropdown-toggle {
+    border-color: var(--color-theme-dark-blue);
+    background-color: var(--color-theme-dark-blue);
+}
+
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.show>.btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgb(0 153 230 / 50%);
+    border-color: var(--color-theme-dark-blue);
+    background-color: var(--color-theme-dark-blue);
+}
+
 label {
     font-weight: 600;
 }
@@ -28,7 +49,45 @@ a:hover {
 }
 
 .btn-outline-primary:hover {
-    color: #fff;
+    color: var(--color-work-area);
     background-color: var(--color-theme);
     border-color: var(--color-theme);
+}
+
+.btn-primary:not(:disabled):not(.disabled).active,
+.btn-primary:not(:disabled):not(.disabled):active,
+.show>.btn-primary.dropdown-toggle {
+    background-color: var(--color-theme-dark-blue);
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled).active,
+.btn-outline-primary:not(:disabled):not(.disabled):active,
+.show>.btn-outline-primary.dropdown-toggle {
+    color: var(--color-work-area);
+    background-color: var(--color-theme);
+    border-color: var(--color-theme);
+}
+
+.btn-outline-primary.focus, .btn-outline-primary:focus {
+    color: var(--color-theme) ;
+    background-color: var(--color-work-area);
+    border-color: var(--color-theme);
+    box-shadow: 0 0 0 0.2rem rgb(0 179 143 / 50%);
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled).active:focus,
+.btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+.show>.btn-outline-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgb(0 179 143 / 50%);
+}
+
+.form-control:focus {
+    border-color: var(--color-theme);
+    box-shadow: 0 0 0 0.2rem rgb(0 179 143 / 25%);;
+}
+
+.btn-light {
+    color: var(--color-black);
+    background-color: var(--color-ultra-light-gray);
+    border-color: #e7e7e7;
 }

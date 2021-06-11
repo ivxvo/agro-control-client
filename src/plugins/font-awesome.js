@@ -10,7 +10,9 @@ import {
     faSave,
     faPen,
     faUserPlus,
-    faUserTag
+    faUserTag,
+    faTrashAlt,
+    faTimes
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -23,7 +25,9 @@ library.add(
     faSave,
     faPen,
     faUserPlus,
-    faUserTag
+    faUserTag,
+    faTrashAlt,
+    faTimes
 );
 
 export { FontAwesomeIcon };

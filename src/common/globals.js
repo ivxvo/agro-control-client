@@ -10,4 +10,9 @@ export function initGlobals(app) {
         NotFound: 404,
         ServerError: 500
     });
+
+    app.config.globalProperties.ColumnFilterType = Object.freeze({
+        text: 1,
+        dropdown: 2
+    });
 }

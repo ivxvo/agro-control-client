@@ -19,6 +19,22 @@
                 }
             }"
         >
+            <Modal v-if="showModal">
+                <template v-slot:body>
+                    Удалить пользователя '{{ selectedUser.username }}' ?
+                </template>
+                <template v-slot:footer>
+                    <button class="btn btn-danger" @click="showModal = false">
+                        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                        Удалить
+                    </button>
+                    <button class="btn btn-light" @click="showModal = false">
+                        <font-awesome-icon :icon="['fas', 'times']"/>
+                        Отмена
+                    </button>
+                </template>
+            </Modal>
+
             <div class="row">
                 <div class="col-md-6">
                     <h5 class="pb-2">Список пользователей</h5>
@@ -29,19 +45,21 @@
                     <Grid
                         :data="users"
                         :pages="pages"
-                        :handlePageChange="getUsers"
+                        :retrieveData="getUsers"
                         :columns="columns"                        
                     >
-                        <!-- <template v-slot:colLink="user">
-                            <div v-tooltip="'Редактировать'">
-                                <router-link :to="'/users/' + user.row.id">
-                                    <i class="fas fa-pen-square"></i>                        
-                                </router-link>
-                            </div>
+                        <template v-slot:id-filter>
+                            <input type="text" class="form-control" v-model="filter.id" @change="getUsers({ page: 1, size: 4 })">
                         </template>
-                        <template v-slot:colButton="user">
-                            <button>{{ user.row.id }}</button>
-                        </template> -->
+                        <template v-slot:username-filter>
+                            <input type="text" class="form-control" v-model="filter.username">
+                        </template>
+                        <template v-slot:email-filter>
+                            <input type="text" class="form-control" v-model="filter.email">
+                        </template>
+                        <template v-slot:role-filter>
+                            <input type="text" class="form-control" v-model="filter.role">
+                        </template>
 
                         <template v-slot:id="user">
                             {{ user.row.id }}
@@ -60,7 +78,11 @@
                                 <font-awesome-icon :icon="['fas', 'pen']"/>                        
                             </router-link>
                         </template>
-
+                        <template v-slot:deleteUser="user">
+                            <button class="btn btn-outline-danger btn-sm" @click="showModalWindow(user.row)">
+                                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                            </button>
+                        </template>
                     </Grid>
                 </div>
             </div>
@@ -70,36 +92,109 @@
 
 <script>
 import UserService from "../services/user.service";
-import Grid from "../components/Grid";
-import Sidebar from "../components/Sidebar";
-import { onMounted, reactive } from 'vue';
+import Grid from "../components/Grid.vue";
+import Sidebar from "../components/Sidebar.vue";
+
+import Modal from "../components/Modal.vue";
+import User from '../models/user';
 
 export default {
     name: "Users",
     components: {
         Grid,
-        Sidebar
+        Sidebar,
+        Modal
     },
-    setup() {
-        const users = reactive({});
-        const pages = reactive({});
-        const initialPaging = {
-            filter: null,
-            page: 1,
-            size: 4
-        };
+    data() {
+        return {
+            users: {},
+            filter: {},
+            pages: {},
+            initialPaging: {
+                filter: null,
+                page: 1,
+                size: 4
+            },
+            showModal: false,
+            selectedUser: new User(),
+            sidebar: {
+                header: {       
+                    name: "usersSidebarHeader",             
+                    text: "Пользователи",
+                    description: "Все пользователи"
+                },
+                backward: null
+                // {       
+                //         name: "usersSidebarItem",             
+                //         text: "Все пользователи",
+                //         img: "fas fa-angle-left",
+                //         path: "/users"
+                // }
+                ,
+                items: [                                
+                    {
+                        name: "addUserSidebarItem",
+                        text: "Добавить пользователя",
+                        img: ["fas", "user-plus"],
+                        path: "/users/register",
+                        parent: "adminMenuItem"
+                    },
+                    {
+                        name: "rolesSidebarItem",
+                        text: "Роли",
+                        img: ["fas", "user-tag"],
+                        path: "",
+                        parent: "adminMenuItem"                    
+                    }
+                ]
+            },
+            columns: [
+                {
+                    name: "id",
+                    header: "id",
+                    filter: "id-filter"
+                },
+                {
+                    name: "username",
+                    header: "Имя",
+                    filter: "username-filter"
+                },
+                {
+                    name: "email",
+                    header: "Эл. почта",
+                    filter: "email-filter"
+                },
+                {
+                    name: "role",
+                    header: "Роль",
+                    filter: "role-filter"
+                },
+                { 
+                    name: "editUser",
+                    // colLink: true,
+                    header: "",
+                    filter: ""
+                },
+                {
+                    name: "deleteUser",
+                    header: "",
+                    filter: ""
+                }
+            ]            
+        }
+    },
+    methods: {
+        getUsers(paging) {
+            paging.filter = Object.keys(this.filter).length > 0 ? this.filter : null;
 
-        onMounted(() => {
-            getUsers(initialPaging);
-        });       
-
-        const getUsers = (paging) => {
             UserService.getUsers(paging).then(
                 res => {
-                    users.countAll = res.data.countAll;
-                    users.pagingItems = res.data.pagingItems;
-                    pages.count = res.data.countPages;
-                    pages.current = res.data.currentPage;
+                    console.log(res.data.message);
+
+                    this.users.countAll = res.data.countAll;
+                    this.users.pagingItems = res.data.pagingItems;
+                    this.pages.count = res.data.countPages;
+                    this.pages.current = res.data.currentPage;
                 },
                 error => {
                     // this.message =
@@ -108,173 +203,23 @@ export default {
                     //     error.toString();
                     // this.successful = false;
                     console.log(error.response);
+                    console.log(error.response.data.message);                    
 
                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
-                }
-                // error => {
-                //     let err =
-                //         (error.response && error.response.data) ||
-                //         error.message ||
-                //         error.toString(); 
-                //     console.log(err);
-                //     // console.error(JSON.stringify(error));
-                //     //////////////////////////////////////////////////////////
-                //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unathorized) {
-                //         this.$store.dispatch("auth/logout");
-                //         this.$router.push({ name: "login" });
-                //     }
-                // }
-            )
-        };
-
-        const sidebar = {
-            header: {       
-                name: "usersSidebarHeader",             
-                text: "Пользователи",
-                description: "Все пользователи"
-            },
-            backward: null
-            // {       
-            //         name: "usersSidebarItem",             
-            //         text: "Все пользователи",
-            //         img: "fas fa-angle-left",
-            //         path: "/users"
-            // }
-            ,
-            items: [                                
-                {
-                    name: "addUserSidebarItem",
-                    text: "Добавить пользователя",
-                    img: ["fas", "user-plus"],
-                    path: "/users/register",
-                    parent: "adminMenuItem"
-                },
-                {
-                    name: "rolesSidebarItem",
-                    text: "Роли",
-                    img: ["fas", "user-tag"],
-                    path: "",
-                    parent: "adminMenuItem"                    
-                }
-            ]
+                }                
+            );
+        },
+        showModalWindow(user) {
+            this.showModal = true;
+            this.selectedUser = user;
         }
-
-        const columns = [
-                {
-                    name: "id",
-                    header: "id"
-                },
-                {
-                    name: "username",
-                    header: "Имя"
-                },
-                {
-                    name: "email",
-                    header: "Эл. почта"
-                },
-                {
-                    name: "role",
-                    header: "Роль"
-                },
-                { 
-                    name: "editUser",
-                    // colLink: true,
-                    header: ""
-                },
-                // {
-                //     name: "editRole",
-                //     colButton: true
-                // }
-            ]
-
-        return { users, pages, columns, sidebar, getUsers }
+    },
+    mounted() {
+        this.getUsers(this.initialPaging);
     }
-    // data() {
-    //     return {
-    //         users: [],
-    //         columns: [
-    //             { name: "id" },
-    //             { name: "username" },
-    //             { name: "email" },
-    //             { name: "role" },
-    //             { 
-    //                 name: "editUser",
-    //                 colLink: true
-    //             },
-    //             {
-    //                 name: "editRole",
-    //                 colButton: true
-    //             }
-    //         ],
-    //         sidebar: {
-    //             header: {       
-    //                 name: "usersSidebarHeader",             
-    //                 text: "Пользователи",
-    //                 description: "Все пользователи"
-    //             },
-    //             backward: null
-    //             // {       
-    //             //         name: "usersSidebarItem",             
-    //             //         text: "Все пользователи",
-    //             //         img: "fas fa-angle-left",
-    //             //         path: "/users"
-    //             // }
-    //             ,
-    //             items: [                                
-    //                 {
-    //                     name: "addUserSidebarItem",
-    //                     text: "Добавить пользователя",
-    //                     img: "fas fa-user-plus",
-    //                     path: "/register",
-    //                     parent: "adminMenuItem"
-    //                 },
-    //                 {
-    //                     name: "rolesSidebarItem",
-    //                     text: "Роли",
-    //                     img: "fas fa-user-tag",
-    //                     path: "",
-    //                     parent: "adminMenuItem"                    
-    //                 }
-    //             ]
-    //         }
-    //     };
-    // },
-    // mounted() {
-    //     // UserService.getAdminBoard().then(
-    //     //     res => {
-    //     //         this.content = res.data;
-    //     //     },
-    //     //     error => {
-    //     //         this.content =
-    //     //             (error.response && error.response.data) ||
-    //     //             error.message ||
-    //     //             error.toString(); 
-    //     //     }
-    //     // );
-    //     UserService.getUsers().then(
-    //         res => {
-    //             this.users = res.data;
-    //             console.log(`user: ${JSON.stringify(this.users)}`);
-
-    //         },
-    //         error => {
-    //             let err =
-    //                 (error.response && error.response.data) ||
-    //                 error.message ||
-    //                 error.toString(); 
-    //             console.log(err);
-    //             // console.error(JSON.stringify(error));
-    //             //////////////////////////////////////////////////////////
-    //             // if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unathorized) {
-    //             //     this.$store.dispatch("auth/logout");
-    //             //     this.$router.push({ name: "login" });
-    //             // }
-    //         }
-    //     )
-
-    // }
+    
 }
 </script>

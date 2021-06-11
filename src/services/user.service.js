@@ -14,12 +14,12 @@ class UserService {
 
     getUsers(params) {
         return axios.get(API_URL + `users`, { params, headers: authHeader() })            
-            .catch(error => {
-                if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
-                    this.$store.dispatch("auth/logout");
-                    this.$router.push({ name: "login" });
-                }
-            });
+            // .catch(error => {
+            //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
+            //         this.$store.dispatch("auth/logout");
+            //         this.$router.push({ name: "login" });
+            //     }
+            // });
     }
 
     // getModeratorBoard() {
@@ -32,22 +32,22 @@ class UserService {
 
     getUser(id) {
         return axios.get(API_URL + `user/${id}`, { headers: authHeader() })
-            .catch(error => {
-                if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
-                    this.$store.dispatch("auth/logout");
-                    this.$router.push({ name: "login" });
-                }
-            });
+            // .catch(error => {
+            //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
+            //         this.$store.dispatch("auth/logout");
+            //         this.$router.push({ name: "login" });
+            //     }
+            // });
     }
 
     updateUser(id, data) {
         return axios.put(API_URL + `user/${id}`, data, { headers: authHeader() })
-            .catch(error => {
-                if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
-                    this.$store.dispatch("auth/logout");
-                    this.$router.push({ name: "login" });
-                }
-            });
+            // .catch(error => {
+            //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
+            //         this.$store.dispatch("auth/logout");
+            //         this.$router.push({ name: "login" });
+            //     }
+            // });
     }
 }
 

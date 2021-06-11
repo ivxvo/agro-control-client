@@ -1,9 +1,6 @@
 <template>
-    <div>
-        <div>Показаны 
-            <b>{{ countFrom }}-{{ countTo }}</b> из 
-            <b>{{ data.countAll }}</b> записей
-        </div>
+    <div v-show="data.countAll">
+        <div v-html="counting"></div>
         <table>
             <thead>
                 <tr>
@@ -17,9 +14,16 @@
                         </span>
                     </th>
                 </tr>
+                <tr>
+                    <td v-for="col in columns" :key="col.name">
+                        <span>
+                            <slot :name="col.filter"></slot>
+                        </span>
+                    </td>
+                </tr>
             </thead>
             <tbody>
-                <tr v-for="row in filteredData" :key="row">
+                <tr v-for="row in filteredData" :key="row" :class="{ last: isLast(row)}">
                     <td v-for="col in columns" :key="col.name">
                         <!-- <span v-if="col && col.colLink">
                             <slot name="colLink" v-bind:row="row"></slot>
@@ -33,14 +37,14 @@
                         </span>
                     </td>
                 </tr>
-            </tbody>
-        </table>
+            </tbody>            
+        </table>        
 
         <div class="row">
             <div class="col-md-9">
                 <ul class="pagination">
                     <li class="page-item" :class="{ active: n === pages.current }" v-for="n in pages.count" :key="n">
-                        <button class="btn btn-primary page-btn" @click="handlePageChange({ filter: null, page: n, size: pageSize })">{{ n }}</button>
+                        <button class="btn btn-primary page-btn" @click="handlePageChange(n)">{{ n }}</button>
                     </li>
                 </ul>
             </div>
@@ -52,6 +56,7 @@
                     </option>
                 </select>
             </div>
+           
         </div>
     </div>
 </template>
@@ -64,7 +69,7 @@ export default {
     props: {
         data: Object,
         pages: Object,
-        handlePageChange: Function,
+        retrieveData: Function,
         columns: Array
     },
     setup(props) {
@@ -115,13 +120,21 @@ export default {
             return rows;
         });
 
+        const isLast = (item) => {
+            return (filteredData.value && filteredData.value.indexOf(item) === filteredData.value.length - 1);
+        };
+
         const pageSizes = [4, 50, 100, 300];
         const pageSize = ref(pageSizes[0]);
 
         const handlePageSizeChange = (event) => {
             pageSize.value = event.target.value;
-            props.handlePageChange({ filter: null, page: 1, size: pageSize.value }); // fix
+            props.retrieveData({ page: 1, size: pageSize.value });
         }
+
+        const handlePageChange = (pageNum) => {
+            props.retrieveData({ page: pageNum, size: pageSize.value });
+        };
 
         const countFrom = computed(() => (currentPage.value - 1) * pageSize.value + 1);
         const countTo = computed(() => {
@@ -133,9 +146,36 @@ export default {
             }
         });
 
-        // const getCorrectEnding = () => {
-        //     if(String(props.data.countAll) ===)
-        // }
+        const counting = computed(() => {
+            // let html = "Показаны 
+            // <b>{{ countFrom }}-{{ countTo }}</b> из 
+            // <b>{{ data.countAll }}</b> записей";
+            if(!countAll.value) {
+                return "";
+            }
+
+            let html = "";
+            if(countAll.value === 1) {
+                html = "Показана <b>1</b> запись";
+            } else if (filteredData.value && filteredData.value.length === 1) {
+                html = `Показана <b>${countAll.value}</b>-я из <b>${countAll.value}</b> ${ending.value}`;
+            } else {
+                html = `Показаны <b>${countFrom.value}-${countTo.value}</b> из <b>${countAll.value}</b> ${ending.value}`;
+            }
+            return html;
+        });
+
+        const ending = computed(() => {
+            const count = String(countAll.value);
+            const last = count.charAt(count.length-1);
+            if(parseInt(last) === 1) {
+                const prev = count.charAt(count.length-2);
+                if(parseInt(prev) !== 1) {
+                    return "записи";
+                }
+            }
+            return "записей";
+        });
 
         return {
             sortOrders,
@@ -145,7 +185,10 @@ export default {
             countTo,
             pageSize,
             pageSizes,
-            handlePageSizeChange
+            handlePageChange,
+            handlePageSizeChange,
+            isLast,
+            counting
         }
     }
     
@@ -226,5 +269,8 @@ export default {
     li.active .page-btn:hover {
         background-color: var(--color-theme-dark-blue);
     }
-
+    
+    .last {
+        border-bottom: 4px double var(--color-gray);
+    }
 </style>
