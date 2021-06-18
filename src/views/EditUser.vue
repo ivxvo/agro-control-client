@@ -21,20 +21,13 @@
                      <div class="form-group">
                         <label for="password">Пароль (задать новый)</label>
                         <input type="password" class="form-control" id="password" v-model="currentUser.password">
-                    </div>
-                    <!-- <div class="form-group">
-                        <label><strong>Status:</strong></label>
-                        {{ currentUser.published ? "Published" : "Pending" }}
-                    </div> -->
+                    </div>                    
                 </form>
 
-                <!-- <button class="badge badge-primary mr-2" v-if="currentUser.published" @click="updatePublished(false)">Unpublish</button>
-                <button class="badge badge-primary mr-2" v-else @click="updatePublished(true)">Publish</button> -->
-                <!-- <button class="badge badge-danger mr-2" @click="deleteUser">Удалить</button> -->
                 <button class="btn btn-primary" @click="updateUser">
                     <font-awesome-icon :icon="['fas', 'save']"/>
-                    Сохранить</button>
-                <p>{{ message }}</p>
+                    Сохранить
+                </button>
             </div>            
         </div>
     </div>
@@ -50,108 +43,67 @@ export default {
     name: "EditUser",
     components: {
         Sidebar
-    },
-    setup() {
-        const sidebar = {
-            header: {       
-                name: "addUserSidebarHeader",             
-                text: "Пользователь",
-                description: "Редактирование пользователя"
-            },
-            backward: {       
-                    name: "addUserSidebarBackward",             
-                    text: "Все пользователи",
-                    img: ["fas", "angle-left"],
-                    path: "/users"
-            }
-            ,
-            items: null
-            // [                                
-            //     {
-            //         name: "addUserSidebarItem",
-            //         text: "Добавить пользователя",
-            //         img: "fas fa-user-plus",
-            //         path: "/register",
-            //         parent: "adminMenuItem"
-            //     },
-            //     {
-            //         name: "rolesSidebarItem",
-            //         text: "Роли",
-            //         img: "fas fa-user-tag",
-            //         path: "",
-            //         parent: "adminMenuItem"                    
-            //     }
-            // ]
-        }
-
-        return { sidebar }
-    },
+    },    
     data() {
         return {
             currentUser: new User(),
-            message: ""
+            sidebar: {
+                header: {       
+                    name: "addUserSidebarHeader",             
+                    text: "Пользователь",
+                    description: "Редактирование пользователя"
+                },
+                backward: {       
+                        name: "addUserSidebarBackward",             
+                        text: "Все пользователи",
+                        img: ["fas", "angle-left"],
+                        path: "/users"
+                }
+                ,
+                items: null
+                // [                                
+                //     {
+                //         name: "addUserSidebarItem",
+                //         text: "Добавить пользователя",
+                //         img: "fas fa-user-plus",
+                //         path: "/register",
+                //         parent: "adminMenuItem"
+                //     },
+                //     {
+                //         name: "rolesSidebarItem",
+                //         text: "Роли",
+                //         img: "fas fa-user-tag",
+                //         path: "",
+                //         parent: "adminMenuItem"                    
+                //     }
+                // ]
+            }
         };
     },
     methods: {
         getUser(id) {
-            console.log(`userId: ${id}`);
-
             UserService.getUser(id)
                 .then(res => {
                     this.currentUser = res.data;
                     this.currentUser.password = "";
-                    console.log(res.data);
                 })
-                .catch(err => {
-                    console.error(err);
+                .catch(error => {
+                    console.error(error);
 
                 });
         },
-
-        // updatePublished(isPublished) {
-        //     let data = {
-        //         id: this.currentUser.id,
-        //         title: this.currentUser.title,
-        //         description: this.currentUser.description,
-        //         published: isPublished
-        //     };
-
-        //     UserService.update(this.currentUser.id, data)
-        //         .then(res => {
-        //             this.currentUser.published = isPublished;
-        //             console.log(res.data);
-        //         })
-        //         .catch(err => {
-        //             console.error(err);
-        //         })
-        // },
-
         updateUser() {            
-            UserService.updateUser(this.currentUser.id, this.currentUser)
+            UserService.updateUser(this.currentUser)
                 .then(res => {
-                    console.log(res.data);
-                    // this.message = "The Tutotial was updated successfully!";
+                    this.$store.commit("alert/setUserAlert", { result: res.data.result, message: res.data.message, caption: "Редактирование пользователя" });
                     this.$router.push({ name: "users" });
                 })
-                .catch(err => {
-                    console.error(err);
-                    this.message = "Ошибка. Данные пользователя не сохранены"
+                .catch(error => {
+                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Редактирование пользователя" });
                 });
-        },
-
-        // deleteUser() {
-        //     UserService.delete(this.currentUser.id)
-        //         .then(res => {
-        //             console.log(res.data);
-        //             this.$router.push({ name: "Users" });
-        //         })
-        //         .catch(err => {
-        //             console.error(err);
-        //         });
-        // }
+        }       
     },
     mounted() {
-        this.message = "";
         this.getUser(this.$route.params.id);
     }
 }

@@ -1,5 +1,5 @@
 <template>
-    <div v-show="data.countAll">
+    <div>
         <div v-html="counting"></div>
         <table>
             <thead>
@@ -16,31 +16,23 @@
                 </tr>
                 <tr>
                     <td v-for="col in columns" :key="col.name">
-                        <span>
-                            <slot :name="col.filter"></slot>
-                        </span>
+                        <slot :name="col.filter"></slot>
                     </td>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="row in filteredData" :key="row" :class="{ last: isLast(row)}">
-                    <td v-for="col in columns" :key="col.name">
-                        <!-- <span v-if="col && col.colLink">
-                            <slot name="colLink" v-bind:row="row"></slot>
-                        </span>
-                        <span v-else-if="col && col.colButton">
-                            <slot name="colButton" v-bind:row="row"></slot>
-                        </span>
-                        <span v-else>{{ row[col.name] }}</span> -->
-                        <span>
-                            <slot :name="col.name" v-bind:row="row"></slot>
-                        </span>
+                <tr v-for="row in pagingItems" :key="row" :class="{ last: isLast(row)}">
+                    <td v-for="col in columns" :key="col.name" :style="col.style">                        
+                        <slot :name="col.name" v-bind:row="row"></slot>
                     </td>
+                </tr>
+                <tr v-show="!data.countAll">
+                    <td :colspan="columns.length">Нет данных по указанным условиям.</td>
                 </tr>
             </tbody>            
         </table>        
 
-        <div class="row">
+        <div class="row" v-show="data.countAll">
             <div class="col-md-9">
                 <ul class="pagination">
                     <li class="page-item" :class="{ active: n === pages.current }" v-for="n in pages.count" :key="n">
@@ -50,11 +42,13 @@
             </div>
 
             <div class="col-md-3">
-                <select v-model="pageSize" @change="handlePageSizeChange($event)">
-                    <option v-for="size in pageSizes" :key="size" :value="size">
-                        {{ size }}
-                    </option>
-                </select>
+                <div class="page-num">
+                    <select v-model="pageSize" @change="handlePageSizeChange($event)">
+                        <option v-for="size in pageSizes" :key="size" :value="size">
+                            {{ size }}
+                        </option>
+                    </select>
+                </div>
             </div>
            
         </div>
@@ -91,49 +85,71 @@ export default {
                 sortOrders[col] = 1;
                 sortCol.value = col;
             }
+            
+            props.retrieveData(1, pageSize.value, order.value);
         };
 
-        const filteredData = computed(() => {
-            const sortKey = sortCol.value;
-            // const filterKey = ""; 
-            const order = sortOrders[sortKey] || 1;
-            let rows = pagingItems.value;
+        const order = computed(() => {
+            const col = sortCol.value;
+            const direction = sortOrders[col] === 1 ? "ASC" : "DESC";
+            const order = {};
+            order[col] = [col, direction];
 
-            // if(filterKey) {
-            //     rows = rows.filter(row => {
-            //         return Object.keys(row).some((key) => {
-            //             return (
-            //                 String(row[key]).toLowerCase().indexOf(filterKey) > -1
-            //             );
-            //         });
-            //     })
-            // }
-
-            if(sortKey) {
-                rows = rows.slice().sort((a, b) => {
-                    a = a[sortKey];
-                    b = b[sortKey];
-                    return (a === b ? 0 : a > b ? 1 : -1) * order;
-                });
-            }
-
-            return rows;
+            return order;
         });
 
+        // const filteredData = computed(() => {
+        //     const sortKey = sortCol.value;
+        //     // const filterKey = ""; 
+        //     const order = sortOrders[sortKey] || 1;
+        //     let rows = pagingItems.value;
+
+        //     // if(filterKey) {
+        //     //     rows = rows.filter(row => {
+        //     //         return Object.keys(row).some((key) => {
+        //     //             return (
+        //     //                 String(row[key]).toLowerCase().indexOf(filterKey) > -1
+        //     //             );
+        //     //         });
+        //     //     })
+        //     // }
+
+        //     if(sortKey) {
+        //         rows = rows.slice().sort((a, b) => {
+        //             a = a[sortKey];
+        //             b = b[sortKey];
+        //             return (a === b ? 0 : a > b ? 1 : -1) * order;
+        //         });
+        //     }
+
+        //     return rows;
+        // });
+
         const isLast = (item) => {
-            return (filteredData.value && filteredData.value.indexOf(item) === filteredData.value.length - 1);
+            return (pagingItems.value && pagingItems.value.indexOf(item) === pagingItems.value.length - 1);
         };
 
-        const pageSizes = [4, 50, 100, 300];
-        const pageSize = ref(pageSizes[0]);
+        // const pageSizes = [4, 50, 100, 300];
+        const pageSizes = computed(() => {
+            if(countAll.value <= 25) {
+                return [25];
+            } else if(countAll.value > 25 && countAll.value <= 50) {
+                return [25, 50];
+            } else if(countAll.value > 50 && countAll.value < 500) {
+                return [25, 50, 100]
+            } else {
+                return [25, 100, 300, 500];
+            }
+        });
+        const pageSize = ref(pageSizes.value[0]);
 
         const handlePageSizeChange = (event) => {
             pageSize.value = event.target.value;
-            props.retrieveData({ page: 1, size: pageSize.value });
+            props.retrieveData(1, pageSize.value, order.value);
         }
 
         const handlePageChange = (pageNum) => {
-            props.retrieveData({ page: pageNum, size: pageSize.value });
+            props.retrieveData(pageNum, pageSize.value, order.value);
         };
 
         const countFrom = computed(() => (currentPage.value - 1) * pageSize.value + 1);
@@ -157,7 +173,7 @@ export default {
             let html = "";
             if(countAll.value === 1) {
                 html = "Показана <b>1</b> запись";
-            } else if (filteredData.value && filteredData.value.length === 1) {
+            } else if (pagingItems.value && pagingItems.value.length === 1) {
                 html = `Показана <b>${countAll.value}</b>-я из <b>${countAll.value}</b> ${ending.value}`;
             } else {
                 html = `Показаны <b>${countFrom.value}-${countTo.value}</b> из <b>${countAll.value}</b> ${ending.value}`;
@@ -180,7 +196,7 @@ export default {
         return {
             sortOrders,
             sortBy,
-            filteredData,
+            pagingItems,
             countFrom,
             countTo,
             pageSize,
@@ -198,11 +214,11 @@ export default {
 <style scoped>
     table {
         border: none;
+        width: 100%;
     }
 
     tr {
         border-top: 1px solid var(--color-gray);
-        /* height: ; */
     }
 
     th {
@@ -210,7 +226,6 @@ export default {
     }
 
     th, td {
-        min-width: 120px;
         padding: 0.35rem;
     }
 
@@ -243,7 +258,12 @@ export default {
     .pagination {
         display: flex;
         list-style: none;
-        margin-top: 2rem;
+        padding-top: 3rem;
+    }
+
+    .page-num {
+        padding-top: 3rem;
+        text-align: right;
     }
 
     .page-item {
@@ -254,6 +274,7 @@ export default {
         background-color: var(--color-light-gray);
         border: none;
         color: var(--color-black);
+        padding: 0.6rem 0.9rem;
     }
 
     li .page-btn:hover {

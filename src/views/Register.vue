@@ -172,6 +172,7 @@ export default {
 
                     // }
 
+                    this.$store.commit("alert/setUserAlert", { result: res.data.result, message: res.data.message, caption: "Добавление пользователя" });
                     this.$router.push({ name: "users" });
                 },
                 error => {
@@ -186,6 +187,9 @@ export default {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
+
+                    this.$store.commit("alert/userAdd", { result: error.response.data.result, message: error.response.data.message, caption: "Добавление пользователя" });
+                    this.$router.push({ name: "users" });
                 }
             );           
         }

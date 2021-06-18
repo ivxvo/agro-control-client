@@ -3,6 +3,10 @@ const constants = {
         Unauthorized: 401,
         NotFound: 404,
         ServerError: 500
+    },
+    result: {
+        success: 1,
+        error: 2
     }
 };
 

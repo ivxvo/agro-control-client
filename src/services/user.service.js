@@ -13,7 +13,7 @@ class UserService {
     // }
 
     getUsers(params) {
-        return axios.get(API_URL + `users`, { params, headers: authHeader() })            
+        return axios.get(API_URL + `users`, { params, headers: authHeader() });
             // .catch(error => {
             //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
             //         this.$store.dispatch("auth/logout");
@@ -31,7 +31,7 @@ class UserService {
     // }
 
     getUser(id) {
-        return axios.get(API_URL + `user/${id}`, { headers: authHeader() })
+        return axios.get(API_URL + `user/${id}`, { headers: authHeader() });
             // .catch(error => {
             //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
             //         this.$store.dispatch("auth/logout");
@@ -40,8 +40,12 @@ class UserService {
             // });
     }
 
-    updateUser(id, data) {
-        return axios.put(API_URL + `user/${id}`, data, { headers: authHeader() })
+    deleteUser(id) {
+        return axios.delete(API_URL + `user/${id}`, { headers: authHeader() });
+    }
+
+    updateUser(user) {
+        return axios.put(API_URL + `user/${user.id}`, user, { headers: authHeader() });
             // .catch(error => {
             //     if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.Unauthorized) {
             //         this.$store.dispatch("auth/logout");

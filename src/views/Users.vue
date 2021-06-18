@@ -24,7 +24,7 @@
                     Удалить пользователя '{{ selectedUser.username }}' ?
                 </template>
                 <template v-slot:footer>
-                    <button class="btn btn-danger" @click="showModal = false">
+                    <button class="btn btn-danger" @click="deleteUser(selectedUser.id)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                         Удалить
                     </button>
@@ -39,9 +39,21 @@
                 <div class="col-md-6">
                     <h5 class="pb-2">Список пользователей</h5>
                 </div>
-            </div>
+            </div>           
+
             <div class="row">
                 <div class="col-md-12">
+                    <div v-show="userAlert.result"
+                        class="alert alert-dismissible fade show"
+                        :class="{ 'alert-success': userAlert.result === ReqResult.success, 'alert-danger': userAlert.result === ReqResult.error }"
+                    >
+                        <h5>{{ userAlert.caption }}</h5>
+                        <span>{{ userAlert.message }}</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>                   
+
                     <Grid
                         :data="users"
                         :pages="pages"
@@ -49,16 +61,16 @@
                         :columns="columns"                        
                     >
                         <template v-slot:id-filter>
-                            <input type="text" class="form-control" v-model="filter.id" @change="getUsers({ page: 1, size: 4 })">
+                            <input type="text" class="form-control" v-model="filter.id" @change="getUsers()">
                         </template>
                         <template v-slot:username-filter>
-                            <input type="text" class="form-control" v-model="filter.username">
+                            <input type="text" class="form-control" v-model="filter.username" @change="getUsers()">
                         </template>
                         <template v-slot:email-filter>
-                            <input type="text" class="form-control" v-model="filter.email">
+                            <input type="text" class="form-control" v-model="filter.email" @change="getUsers()">
                         </template>
                         <template v-slot:role-filter>
-                            <input type="text" class="form-control" v-model="filter.role">
+                            <input type="text" class="form-control" v-model="filter.role" @change="getUsers()">
                         </template>
 
                         <template v-slot:id="user">
@@ -110,13 +122,13 @@ export default {
             users: {},
             filter: {},
             pages: {},
-            initialPaging: {
-                filter: null,
-                page: 1,
-                size: 4
-            },
+            // initialPaging: {
+            //     filter: null,
+            //     page: 1,
+            //     size: 4
+            // },
             showModal: false,
-            selectedUser: new User(),
+            selectedUser: new User(),            
             sidebar: {
                 header: {       
                     name: "usersSidebarHeader",             
@@ -152,73 +164,113 @@ export default {
                 {
                     name: "id",
                     header: "id",
-                    filter: "id-filter"
+                    filter: "id-filter",
+                    style: null
                 },
                 {
                     name: "username",
                     header: "Имя",
-                    filter: "username-filter"
+                    filter: "username-filter",
+                    style: null
                 },
                 {
                     name: "email",
                     header: "Эл. почта",
-                    filter: "email-filter"
+                    filter: "email-filter",
+                    style: null
                 },
                 {
                     name: "role",
                     header: "Роль",
-                    filter: "role-filter"
+                    filter: "role-filter",
+                    style: null
                 },
                 { 
                     name: "editUser",
-                    // colLink: true,
-                    header: "",
-                    filter: ""
+                    header: null,
+                    filter: null,
+                    style: {
+                        "text-align": "right",
+                        width: "1px"
+                    }
                 },
                 {
                     name: "deleteUser",
-                    header: "",
-                    filter: ""
+                    header: null,
+                    filter: null,
+                    style: {
+                        "text-align": "right",
+                        width: "1px"
+                    }
                 }
             ]            
         }
     },
+    computed: {
+        userAlert() {         
+            return this.$store.state.alert.userAlert;
+        }
+    },
     methods: {
-        getUsers(paging) {
-            paging.filter = Object.keys(this.filter).length > 0 ? this.filter : null;
+        getUsers(page, size, order) {
+            let params = {
+                page: page,
+                size: size,
+                order: order
+            };
+            
+            params.filter = Object.keys(this.filter).length > 0 ? this.filter : null;            
 
-            UserService.getUsers(paging).then(
+            UserService.getUsers(params).then(
                 res => {
-                    console.log(res.data.message);
-
                     this.users.countAll = res.data.countAll;
                     this.users.pagingItems = res.data.pagingItems;
                     this.pages.count = res.data.countPages;
                     this.pages.current = res.data.currentPage;
                 },
-                error => {
-                    // this.message =
-                    //     (error.response && error.response.data) ||
-                    //     error.message ||
-                    //     error.toString();
-                    // this.successful = false;
-                    console.log(error.response);
-                    console.log(error.response.data.message);                    
-
+                error => {                 
                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
+
+                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение пользователей" });
                 }                
             );
+        },
+        deleteUser(userId) {
+            if(userId) {
+                UserService.deleteUser(userId)
+                .then(res => {
+                    this.$store.commit("alert/setUserAlert", { result: res.data.result, message: res.data.message, caption: "Удаление пользователя" });
+                })
+                .catch(error => {                                       
+                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        this.$store.dispatch("auth/logout");
+                        this.$router.push({ name: "login" });
+                    }
+
+                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Удаление пользователя" });
+                })
+                .finally(() => {
+                    this.showModal = false;
+                    this.getUsers();
+                });
+            }
         },
         showModalWindow(user) {
             this.showModal = true;
             this.selectedUser = user;
+        },
+        getFilteredProperty() {
+
         }
     },
     mounted() {
-        this.getUsers(this.initialPaging);
+        this.getUsers();
+    },
+    unmounted() {
+        this.$store.commit("alert/resetState");
     }
     
 }
