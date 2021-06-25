@@ -58,13 +58,27 @@
                         :data="users"
                         :pages="pages"
                         :retrieveData="getUsers"
-                        :columns="columns"                        
+                        :columns="columns"
+                        
                     >
                         <template v-slot:id-filter>
                             <input type="text" class="form-control" v-model="filter.id" @change="getUsers()">
                         </template>
                         <template v-slot:username-filter>
-                            <input type="text" class="form-control" v-model="filter.username" @change="getUsers()">
+                            <!-- <input type="text" class="form-control" v-model="filter.username" @change="getUsers()"> -->
+                            <Dropdown
+                                :items="propertyFilteredList"
+                                @input-typed="getFilteredUserProperty({ field: 'username', searchValue: $event, limit: 5 })"
+                                @input-changed="onFilterChanged({ field: 'username', value: $event })"
+                                @item-selected="onFilterChanged({ field: 'username', value: $event.name })"
+                            >
+                                <template v-slot:current-item="item">
+                                    {{ item.current.name }}
+                                </template>
+                                <template v-slot:selected-item="item">
+                                    {{ item.selected.name }}
+                                </template>
+                            </Dropdown>
                         </template>
                         <template v-slot:email-filter>
                             <input type="text" class="form-control" v-model="filter.email" @change="getUsers()">
@@ -85,12 +99,12 @@
                         <template v-slot:role="user">
                             {{ user.row.Role.name }}
                         </template>
-                        <template v-slot:editUser="user">
+                        <template v-slot:edit-user="user">
                             <router-link class="btn btn-outline-primary btn-sm" :to="'/users/' + user.row.id">
                                 <font-awesome-icon :icon="['fas', 'pen']"/>                        
                             </router-link>
                         </template>
-                        <template v-slot:deleteUser="user">
+                        <template v-slot:delete-user="user">
                             <button class="btn btn-outline-danger btn-sm" @click="showModalWindow(user.row)">
                                 <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </button>
@@ -103,31 +117,38 @@
 </template>
 
 <script>
+import User from '../models/user';
 import UserService from "../services/user.service";
+
 import Grid from "../components/Grid.vue";
 import Sidebar from "../components/Sidebar.vue";
 
 import Modal from "../components/Modal.vue";
-import User from '../models/user';
+import Dropdown from "../components/Dropdown.vue";
 
 export default {
     name: "Users",
     components: {
         Grid,
         Sidebar,
-        Modal
+        Modal,
+        Dropdown
     },
     data() {
         return {
             users: {},
             filter: {},
             pages: {},
+            page: 1,
+            pageSize: 25,
+            order: null,
             // initialPaging: {
             //     filter: null,
             //     page: 1,
             //     size: 4
             // },
             showModal: false,
+            propertyFilteredList: [],
             selectedUser: new User(),            
             sidebar: {
                 header: {       
@@ -186,7 +207,7 @@ export default {
                     style: null
                 },
                 { 
-                    name: "editUser",
+                    name: "edit-user",
                     header: null,
                     filter: null,
                     style: {
@@ -195,7 +216,7 @@ export default {
                     }
                 },
                 {
-                    name: "deleteUser",
+                    name: "delete-user",
                     header: null,
                     filter: null,
                     style: {
@@ -212,11 +233,21 @@ export default {
         }
     },
     methods: {
-        getUsers(page, size, order) {
+        // onFilterTyped(typedValue) {
+        //     if(typedValue.length >= 3) {
+        //         this.getFilteredUserProperty
+        //     }
+        // },
+        onFilterChanged(event) {
+            const { field, value } = event;
+            this.filter[field] = value;
+            this.getUsers();
+        },        
+        getUsers() {
             let params = {
-                page: page,
-                size: size,
-                order: order
+                page: this.page,
+                size: this.pageSize,
+                order: this.order
             };
             
             params.filter = Object.keys(this.filter).length > 0 ? this.filter : null;            
@@ -262,7 +293,20 @@ export default {
             this.showModal = true;
             this.selectedUser = user;
         },
-        getFilteredProperty() {
+        getFilteredUserProperty(params) {
+            UserService.getFilteredUserProperty(params).then(
+                res => {
+                    this.propertyFilteredList = res.data;
+                },
+                error => {
+                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        this.$store.dispatch("auth/logout");
+                        this.$router.push({ name: "login" });
+                    }
+
+                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение атрибута фильтрации" });
+                }
+            );
 
         }
     },

@@ -36,14 +36,14 @@
             <div class="col-md-9">
                 <ul class="pagination">
                     <li class="page-item" :class="{ active: n === pages.current }" v-for="n in pages.count" :key="n">
-                        <button class="btn btn-primary page-btn" @click="handlePageChange(n)">{{ n }}</button>
+                        <button class="btn btn-primary page-btn" @click="onPageChanged(n)">{{ n }}</button>
                     </li>
                 </ul>
             </div>
 
             <div class="col-md-3">
                 <div class="page-num">
-                    <select v-model="pageSize" @change="handlePageSizeChange($event)">
+                    <select v-model="pageSize" @change="onPageSizeChanged($event)">
                         <option v-for="size in pageSizes" :key="size" :value="size">
                             {{ size }}
                         </option>
@@ -60,13 +60,14 @@ import { reactive, toRef, ref, computed } from 'vue'
 
 export default {
     name: "Grid",
+    emits: ["order-changed", "page-changed", "page-size-changed"],
     props: {
         data: Object,
         pages: Object,
         retrieveData: Function,
         columns: Array
     },
-    setup(props) {
+    setup(props, context) {
         const countAll = toRef(props.data, "countAll");
         const pagingItems = toRef(props.data, "pagingItems");
 
@@ -86,7 +87,8 @@ export default {
                 sortCol.value = col;
             }
             
-            props.retrieveData(1, pageSize.value, order.value);
+            // props.retrieveData(1, pageSize.value, order.value);
+            context.emit("order-changed", order.value);
         };
 
         const order = computed(() => {
@@ -143,13 +145,15 @@ export default {
         });
         const pageSize = ref(pageSizes.value[0]);
 
-        const handlePageSizeChange = (event) => {
+        const onPageSizeChanged = (event) => {
             pageSize.value = event.target.value;
-            props.retrieveData(1, pageSize.value, order.value);
+            // props.retrieveData(1, pageSize.value, order.value);
+            context.emit("page-size-changed", pageSize.value);
         }
 
-        const handlePageChange = (pageNum) => {
-            props.retrieveData(pageNum, pageSize.value, order.value);
+        const onPageChanged = (pageNum) => {
+            // props.retrieveData(pageNum, pageSize.value, order.value);
+            context.emit("page-changed", pageNum);
         };
 
         const countFrom = computed(() => (currentPage.value - 1) * pageSize.value + 1);
@@ -201,8 +205,8 @@ export default {
             countTo,
             pageSize,
             pageSizes,
-            handlePageChange,
-            handlePageSizeChange,
+            onPageChanged,
+            onPageSizeChanged,
             isLast,
             counting
         }
@@ -258,7 +262,7 @@ export default {
     .pagination {
         display: flex;
         list-style: none;
-        padding-top: 3rem;
+        margin-top: 3rem;
     }
 
     .page-num {
