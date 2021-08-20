@@ -1,13 +1,16 @@
 <template>
+<div>
+
     <button
             class="sidebar-toggle"
             :class="{ 'showed-sidebar': showed }"
             @click="toggleSidebar"
     >
-        <span v-show="showed" v-tooltip="'Свернуть меню'">
+        <q-tooltip>{{ sidebarToggleTip }}</q-tooltip>
+        <span v-show="showed">
             <font-awesome-icon :icon="['fas', 'angle-left']"/>
         </span>
-        <span v-show="!showed" v-tooltip="'Развернуть меню'">
+        <span v-show="!showed">
             <font-awesome-icon :icon="['fas', 'angle-right']"/>
         </span>
     </button>
@@ -25,26 +28,38 @@
                     {{ backward.text }}
                 </router-link>
             </div>
-            <hr v-show="backward != null && items != null">
+            <hr class="horizontal" v-show="backward != null && items != null">
             <div>
                 <ul class="list-group">
                     <li v-for="item in items"
                         :key="item.name"
-                        :class="{ active: item.name == selected }"
+                        :class="{ active: item.name == selected }"                        
                     >
-                        <router-link
-                            :to="item.path"
-                            class="list-group-item list-group-item-action"                            
-                        >
-                            <font-awesome-icon :icon="item.img"/>
-                            {{ item.text }}
-                        </router-link>
+                        <div v-if="item.path">
+                            <router-link
+                                :to="item.path"
+                                class="list-group-item list-group-item-action"                            
+                            >
+                                <font-awesome-icon :icon="item.img"/>
+                                {{ item.text }}
+                            </router-link>        
+                        </div>            
+                        <div v-else-if="item.action">
+                            <button
+                                @click="item.action"
+                                class="list-group-item list-group-item-action"
+                            >
+                                <font-awesome-icon :icon="item.img"/>
+                                {{ item.text }}
+                            </button>
+                        </div>
                     </li>
                 </ul>                  
             </div>
         </div>
     </div>
 
+</div>
 </template>
 
 <script>
@@ -64,18 +79,12 @@ export default {
     computed: {        
         showed() {
            return this.$store.state.menu.showedSidebar;
+        },
+        sidebarToggleTip() {
+            return this.showed ? "Свернуть меню" : "Развернуть меню"
         }
     },
-    methods: {            
-        setSelectedItem(itemName) {
-            this.selected = itemName;
-            if(this.checkIsParent(itemName)) {
-                this.$store.commit("menu/setParent", itemName);
-            }
-        },
-        checkIsParent(itemName) {
-            return (this.items.findIndex(item => item.parent == itemName) != -1 ? true : false);            
-        },
+    methods: {                  
         toggleSidebar() {
             this.$store.commit("menu/showSidebar", !this.showed);
         }
@@ -133,6 +142,11 @@ export default {
         border-radius: 25px;
     }
 
+    .left-sidebar .left-sidebar-content button {
+        padding: 7px 5px;
+        border-radius: 25px;
+    }
+
     .left-sidebar .left-sidebar-content li.active a {
         background-color: var(--color-light-blue);
     }
@@ -146,7 +160,15 @@ export default {
         background: var(--color-ultra-light-gray);
     }
 
+    .left-sidebar .left-sidebar-content button:hover {
+        background: var(--color-ultra-light-gray);
+    }
+
     .left-sidebar .left-sidebar-content a:hover svg {
+        transform: scale(1.1);
+    }
+
+    .left-sidebar .left-sidebar-content button:hover svg {
         transform: scale(1.1);
     }
     
@@ -197,6 +219,11 @@ export default {
 
     .showed-sidebar {
         left: 307px;
+    }
+
+    .horizontal {
+        height: 0.1px;
+        color: var(--color-light-gray)
     }
 
 </style>

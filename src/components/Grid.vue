@@ -1,11 +1,12 @@
 <template>
     <div>
         <div v-html="counting"></div>
-        <table>
+        <table class="fix-layout">
             <thead>
                 <tr>
                     <th v-for="col in columns"
                         :key="col.name"
+                        :style="col.style"
                         @click="sortBy(col.name)"
                     >
                         <span class="header">
@@ -32,31 +33,42 @@
             </tbody>            
         </table>        
 
-        <div class="row" v-show="data.countAll">
-            <div class="col-md-9">
+        <div class="row align-items-center" v-if="pages">
+            <div class="col-md-11">
                 <ul class="pagination">
                     <li class="page-item" :class="{ active: n === pages.current }" v-for="n in pages.count" :key="n">
-                        <button class="btn btn-primary page-btn" @click="onPageChanged(n)">{{ n }}</button>
+                        <button class="btn btn-primary page-btn" @click="onPageChanged(n)">
+                            {{ n }}
+                        </button>
                     </li>
                 </ul>
             </div>
 
-            <div class="col-md-3">
-                <div class="page-num">
-                    <select v-model="pageSize" @change="onPageSizeChanged($event)">
-                        <option v-for="size in pageSizes" :key="size" :value="size">
-                            {{ size }}
-                        </option>
-                    </select>
-                </div>
+            <div class="col-md-1">
+                <!-- <div class="row justify-end"> -->
+                    <div class="page-size">                        
+                        <q-select
+                            v-model="pageSize"
+                            :options="pageSizes"
+                            :dropdown-icon="iconfasChevronDown"
+                            dense
+                            hide-bottom-space
+                            options-dense
+                            color="light-blue-7"
+                            popup-content-style="overflow:hidden"
+                        >
+                        </q-select>                                                      
+                    </div>
+                <!-- </div> -->
             </div>
            
-        </div>
+        </div>               
     </div>
 </template>
 
 <script>
 import { reactive, toRef, ref, computed } from 'vue'
+import { fasChevronDown } from "@quasar/extras/fontawesome-v5";
 
 export default {
     name: "Grid",
@@ -64,14 +76,23 @@ export default {
     props: {
         data: Object,
         pages: Object,
-        retrieveData: Function,
         columns: Array
+    },
+    data() {
+        return {
+            iconfasChevronDown: fasChevronDown
+        }
+    },
+    watch: {
+        pageSize(val) {
+            this.$emit("page-size-changed", val);
+        }
     },
     setup(props, context) {
         const countAll = toRef(props.data, "countAll");
-        const pagingItems = toRef(props.data, "pagingItems");
+        const pagingItems = toRef(props.data, "items");
 
-        const currentPage = toRef(props.pages, "current");
+        const currentPage = props.pages ? toRef(props.pages, "current") : null;
 
         const sortCol = ref("");
 
@@ -145,14 +166,15 @@ export default {
         });
         const pageSize = ref(pageSizes.value[0]);
 
-        const onPageSizeChanged = (event) => {
-            pageSize.value = event.target.value;
+        const onPageSizeChanged = () => {
+            // pageSize.value = value;
             // props.retrieveData(1, pageSize.value, order.value);
             context.emit("page-size-changed", pageSize.value);
         }
 
         const onPageChanged = (pageNum) => {
             // props.retrieveData(pageNum, pageSize.value, order.value);
+
             context.emit("page-changed", pageNum);
         };
 
@@ -262,12 +284,12 @@ export default {
     .pagination {
         display: flex;
         list-style: none;
-        margin-top: 3rem;
+        /* margin: 2rem 0; */
     }
 
-    .page-num {
-        padding-top: 3rem;
-        text-align: right;
+    .page-size {
+        margin: 2rem 0;
+        max-width: 4rem;
     }
 
     .page-item {
@@ -279,6 +301,7 @@ export default {
         border: none;
         color: var(--color-black);
         padding: 0.6rem 0.9rem;
+        font-size: 1rem;
     }
 
     li .page-btn:hover {
@@ -298,4 +321,9 @@ export default {
     .last {
         border-bottom: 4px double var(--color-gray);
     }
+
+    /* .fix-layout {
+        table-layout: fixed;
+    } */
+
 </style>

@@ -1,5 +1,5 @@
 <template>
-
+<div>
     <Sidebar
         :header="sidebar.header"
         :backward="sidebar.backward"
@@ -7,18 +7,7 @@
     ></Sidebar>
 
     <div class="main-container">
-        <div class="container-fluid"
-            v-tooltip="{
-                'displayArrow': true,
-                theme: {
-                    placement: 'top',
-                    //width: 'fit-content',
-                    'background-color': 'var(--color-gray)',
-                    'color': 'var(--color-black)',
-                    'font-size': 'var(--tooltip-font-size)'
-                }
-            }"
-        >
+        <div class="container-fluid">
             <Modal v-if="showModal">
                 <template v-slot:body>
                     Удалить пользователя '{{ selectedUser.username }}' ?
@@ -57,20 +46,14 @@
                     <Grid
                         :data="users"
                         :pages="pages"
-                        :retrieveData="getUsers"
                         :columns="columns"
-                        
+                        @order-changed="onOrderChanged($event)"
+                        @page-changed="onPageChanged($event)"
+                        @page-size-changed="onPageSizeChanged($event)"
                     >
-                        <template v-slot:id-filter>
-                            <input type="text" class="form-control" v-model="filter.id" @change="getUsers()">
-                        </template>
-                        <template v-slot:username-filter>
-                            <!-- <input type="text" class="form-control" v-model="filter.username" @change="getUsers()"> -->
+                        <!-- <template v-slot:id-filter>
                             <Dropdown
-                                :items="propertyFilteredList"
-                                @input-typed="getFilteredUserProperty({ field: 'username', searchValue: $event, limit: 5 })"
-                                @input-changed="onFilterChanged({ field: 'username', value: $event })"
-                                @item-selected="onFilterChanged({ field: 'username', value: $event.name })"
+                                @input-changed="onFilterChanged({ field: 'id', value: $event })"
                             >
                                 <template v-slot:current-item="item">
                                     {{ item.current.name }}
@@ -79,12 +62,45 @@
                                     {{ item.selected.name }}
                                 </template>
                             </Dropdown>
+                        </template> -->
+                        <template v-slot:id-filter>
+                            <Dropdown
+                                @item-selected="onFilterChanged('userId', $event)"
+                            >
+                                <template v-slot:current-item="item">
+                                    {{ item.current.label }}
+                                </template>                                
+                            </Dropdown>
+                        </template>
+                        <template v-slot:username-filter>
+                            <Dropdown
+                                @input-typed="getFilteredUserProperty('User', 'username', $event, 5)"
+                                @item-selected="onFilterChanged('userId', $event)"
+                            >
+                                <template v-slot:current-item="item">
+                                    {{ item.current.label }}
+                                </template>                                
+                            </Dropdown>
                         </template>
                         <template v-slot:email-filter>
-                            <input type="text" class="form-control" v-model="filter.email" @change="getUsers()">
+                            <Dropdown
+                                @input-typed="getFilteredUserProperty('User', 'email', $event, 5)"
+                                @item-selected="onFilterChanged('userId', $event)"
+                            >
+                                <template v-slot:current-item="item">
+                                    {{ item.current.label }}
+                                </template>                                
+                            </Dropdown>
                         </template>
                         <template v-slot:role-filter>
-                            <input type="text" class="form-control" v-model="filter.role" @change="getUsers()">
+                            <Dropdown
+                                @input-typed="getFilteredUserProperty('Role', 'name', $event, 5)"
+                                @item-selected="onFilterChanged('roleId', $event)"
+                            >
+                                <template v-slot:current-item="item">
+                                    {{ item.current.label }}
+                                </template>                                
+                            </Dropdown>
                         </template>
 
                         <template v-slot:id="user">
@@ -100,7 +116,7 @@
                             {{ user.row.Role.name }}
                         </template>
                         <template v-slot:edit-user="user">
-                            <router-link class="btn btn-outline-primary btn-sm" :to="'/users/' + user.row.id">
+                            <router-link class="btn btn-outline-primary btn-sm" :to="'/admin/users/' + user.row.id">
                                 <font-awesome-icon :icon="['fas', 'pen']"/>                        
                             </router-link>
                         </template>
@@ -113,16 +129,19 @@
                 </div>
             </div>
         </div>
-    </div>    
+    </div>
+    
+</div>
 </template>
 
 <script>
-import User from '../models/user';
+import User from '../models/user.model';
+import DropdownSearch from "../models/dropdownSearch.model";
+
 import UserService from "../services/user.service";
 
 import Grid from "../components/Grid.vue";
 import Sidebar from "../components/Sidebar.vue";
-
 import Modal from "../components/Modal.vue";
 import Dropdown from "../components/Dropdown.vue";
 
@@ -148,7 +167,6 @@ export default {
             //     size: 4
             // },
             showModal: false,
-            propertyFilteredList: [],
             selectedUser: new User(),            
             sidebar: {
                 header: {       
@@ -169,15 +187,13 @@ export default {
                         name: "addUserSidebarItem",
                         text: "Добавить пользователя",
                         img: ["fas", "user-plus"],
-                        path: "/users/register",
-                        parent: "adminMenuItem"
+                        path: "/admin/users/register",
                     },
                     {
                         name: "rolesSidebarItem",
                         text: "Роли",
                         img: ["fas", "user-tag"],
-                        path: "",
-                        parent: "adminMenuItem"                    
+                        path: "/admin/roles",
                     }
                 ]
             },
@@ -186,33 +202,41 @@ export default {
                     name: "id",
                     header: "id",
                     filter: "id-filter",
-                    style: null
+                    style: {
+                        width: "10%"
+                    }
                 },
                 {
                     name: "username",
                     header: "Имя",
                     filter: "username-filter",
-                    style: null
+                    style: {
+                        width: "30%"
+                    }
                 },
                 {
                     name: "email",
                     header: "Эл. почта",
                     filter: "email-filter",
-                    style: null
+                    style: {
+                        width: "30%"
+                    }
                 },
                 {
                     name: "role",
                     header: "Роль",
                     filter: "role-filter",
-                    style: null
+                    style: {
+                        width: "20%"
+                    }
                 },
                 { 
                     name: "edit-user",
                     header: null,
                     filter: null,
                     style: {
-                        "text-align": "right",
-                        width: "1px"
+                        // "text-align": "right",
+                        width: "1%"
                     }
                 },
                 {
@@ -220,8 +244,8 @@ export default {
                     header: null,
                     filter: null,
                     style: {
-                        "text-align": "right",
-                        width: "1px"
+                        // "text-align": "right",
+                        width: "1%"
                     }
                 }
             ]            
@@ -229,7 +253,7 @@ export default {
     },
     computed: {
         userAlert() {         
-            return this.$store.state.alert.userAlert;
+            return this.$store.state.alert;
         }
     },
     methods: {
@@ -238,9 +262,25 @@ export default {
         //         this.getFilteredUserProperty
         //     }
         // },
-        onFilterChanged(event) {
-            const { field, value } = event;
-            this.filter[field] = value;
+        onOrderChanged(order) {
+            this.order = order;
+            this.getUsers();
+        },
+        onPageChanged(page) {
+            this.page = page;
+            this.getUsers();
+        },
+        onPageSizeChanged(pageSize) {
+            this.pageSize = pageSize;
+            this.getUsers();
+        },
+        onFilterChanged(field, value) {
+            if(value == null) {
+                delete this.filter[field];
+            } else {
+                this.filter[field] = value;
+            }
+
             this.getUsers();
         },        
         getUsers() {
@@ -255,7 +295,7 @@ export default {
             UserService.getUsers(params).then(
                 res => {
                     this.users.countAll = res.data.countAll;
-                    this.users.pagingItems = res.data.pagingItems;
+                    this.users.items = res.data.pagingItems;
                     this.pages.count = res.data.countPages;
                     this.pages.current = res.data.currentPage;
                 },
@@ -265,7 +305,7 @@ export default {
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение пользователей" });
+                    this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение пользователей" });
                 }                
             );
         },
@@ -273,7 +313,7 @@ export default {
             if(userId) {
                 UserService.deleteUser(userId)
                 .then(res => {
-                    this.$store.commit("alert/setUserAlert", { result: res.data.result, message: res.data.message, caption: "Удаление пользователя" });
+                    this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Удаление пользователя" });
                 })
                 .catch(error => {                                       
                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
@@ -281,7 +321,7 @@ export default {
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Удаление пользователя" });
+                    this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Удаление пользователя" });
                 })
                 .finally(() => {
                     this.showModal = false;
@@ -293,10 +333,11 @@ export default {
             this.showModal = true;
             this.selectedUser = user;
         },
-        getFilteredUserProperty(params) {
+        getFilteredUserProperty(model, field, value, limit) {
+            const params = new DropdownSearch(model, field, value, limit);
             UserService.getFilteredUserProperty(params).then(
                 res => {
-                    this.propertyFilteredList = res.data;
+                    this.$store.commit("dropdown/setDropdownData", res.data);                   
                 },
                 error => {
                      if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
@@ -304,7 +345,7 @@ export default {
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение атрибута фильтрации" });
+                    this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение атрибута фильтрации" });
                 }
             );
 

@@ -13,14 +13,29 @@
                 <div class="login-title-text">Киберсофт.Агроконтроль</div>
             </div>
             <form @submit.prevent="handleLogin">
-                <div class="form-group">
-                    <label for="username">Имя</label>
+                <!-- <div class="form-group"> -->
+                    <!-- <label for="username">Имя</label>
                     <input
                         type="text"
                         name="username"
                         class="form-control"
                         v-model="user.username"
-                    />
+                    /> -->
+                <div v-if="message"
+                    class="alert alert-danger alert-dismissible fade show"
+                >
+                    <h5>Авторизация</h5>
+                    <span>{{ message }}</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div>
+                    <q-input
+                        v-model="user.username"
+                        label="Имя"
+                        color="light-blue-7"
+                    ></q-input>
                     <div
                         v-if="v$.user.username.$error"
                         class="alert-danger"
@@ -29,21 +44,30 @@
                             Имя обязательно для заполнения
                         </template>
                         <template v-else-if="v$.user.username.minLength.$invalid">
-                            Длина имени не должна быть менее {{ v$.user.username.minLength.$params.min }} символов
+                            Длина имени должна быть не менее {{ v$.user.username.minLength.$params.min }} символов
                         </template>
                         <template v-else-if="v$.user.username.maxLength.$invalid">
                             Длина имени не должна превышать {{ v$.user.username.maxLength.$params.max }} символов
                         </template>
                     </div>                    
-                </div>
-                <div class="form-group">
-                    <label for="password">Пароль</label>
+                <!-- </div> -->
+                <!-- <div class="form-group"> -->
+                    <!-- <label for="password">Пароль</label>
                     <input
                         type="password"
                         name="password"
                         class="form-control"
                         v-model="user.password"
-                    />
+                    /> -->
+
+                    <q-input
+                        type="password"
+                        v-model="user.password"
+                        label="Пароль"
+                        color="light-blue-7"
+                        @keydown.enter="handleLogin"
+
+                    ></q-input>
                     <div
                         v-if="v$.user.password.$error"
                         class="alert-danger"
@@ -59,15 +83,27 @@
                         </template>
                     </div>
                 </div>
-                <div class="form-group">
+
+                <!-- </div> -->
+                <!-- <div class="btn-signin">
                     <button class="btn btn-primary btn-block" :disabled="loading">
                         <span v-show="loading" class="spinner-border spinner-border-sm"></span>
                         <span>Войти</span>
                     </button>
+                </div> -->
+                <div class="btn-signin">
+                <q-btn
+                    color="teal"
+                    text-color="light-blue-1"
+                    unelevated
+                    label="Войти"
+                    @click="handleLogin"
+                >
+                </q-btn>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <div v-if="message" class="alert alert-danger" role="alert">{{message}}</div>
-                </div>
+                </div> -->
             </form>
         </div>
     </div>
@@ -83,7 +119,7 @@
 import useVuelidate from "@vuelidate/core";
 import { required, minLength, maxLength } from "@vuelidate/validators";
 
-import User from "../models/user";
+import User from "../models/user.model";
 
 export default {
     name: "Login",
@@ -94,7 +130,7 @@ export default {
         return {
             user: new User('', '', ''),
             loading: false,
-            message: ''
+            message: null
         };
     },
     validations() {
@@ -112,7 +148,7 @@ export default {
     },
     created() {
         if(this.loggedIn) {
-            this.$router.push('/profile');
+            this.$router.push('/dashboards');
         }
     },
     methods: {
@@ -130,15 +166,15 @@ export default {
 
                 if(this.user.username && this.user.password) {
                     this.$store.dispatch("auth/login", this.user).then(
-                        () => {
-                            this.$router.push("/profile");
+                        () => {                            
+                            this.$router.push("/dashboards");
                         },
                         error => {
                             this.loading = false;
-                            if(error.response && error.response.status && error.response.status == this.$store.state.consts.httpStatus.NotFound) {
+                            if(error.status == this.HttpStatus.NotFound) {
                                 this.message = `Пользователь '${this.user.username}' не найден.`;
                             } else {
-                                this.message = error.response.data.message;
+                                this.message = error.message;
                             }
                         }
                     )
@@ -208,4 +244,9 @@ input {
   -webkit-border-radius: 50%;
   border-radius: 50%;
 }
+
+.btn-signin {
+    margin: 2rem 0;
+}
+
 </style>

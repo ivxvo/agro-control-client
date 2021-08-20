@@ -12,11 +12,11 @@ export default {
     name: "Home",
     data() {
         return {
-            content: ""
+            content: "Графики"
         };
     },
     mounted() {
-        // this.$store.commit("menu/showSidebar", false);
+        this.$store.commit("menu/showSidebar", false);
         // console.log(`show: ${this.$store.state.menu.showedSidebar}`);
 
         // UserService.getPublicContent().then(

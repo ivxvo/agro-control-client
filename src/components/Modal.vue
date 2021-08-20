@@ -3,10 +3,21 @@
     <transition name="modal">
         <div class="modal-mask">
             <div class="modal-wrapper">
-                <div class="modal-container">
+                <div class="modal-container"
+                    :style="containerStyle"
+                >
 
                     <div class="modal-header">
                         <slot name="header"></slot>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                            @click="$emit('close')"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
 
                     <div class="modal-body">
@@ -23,6 +34,18 @@
     </transition>
 
 </template>
+
+<script>
+
+    export default {
+        name: "Modal",
+        emits: ["close"],
+        props: {
+            "containerStyle": Object
+        }
+    }
+
+</script>
 
 <style scoped>
 
@@ -46,7 +69,7 @@
     .modal-container {
         width: 30rem;
         margin: 0px auto;
-        padding: 1.3rem 2rem;
+        padding: 1rem;
         background-color: var(--color-work-area);
         border-radius: 2px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);

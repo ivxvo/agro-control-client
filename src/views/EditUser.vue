@@ -9,6 +9,14 @@
         <div class="container-fluid">
             <div class="edit-form">
                 <h4>Редактирование пользователя</h4>
+                <div v-if="message"
+                    class="alert alert-danger alert-dismissible fade show"
+                >
+                    <span>{{ message }}</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <form>
                     <div class="form-group">
                         <label for="username">Имя</label>
@@ -35,7 +43,7 @@
 
 <script>
 import UserService from "../services/user.service";
-import User from "../models/user";
+import User from "../models/user.model";
 
 import Sidebar from "../components/Sidebar";
 
@@ -57,7 +65,7 @@ export default {
                         name: "addUserSidebarBackward",             
                         text: "Все пользователи",
                         img: ["fas", "angle-left"],
-                        path: "/users"
+                        path: "/admin/users"
                 }
                 ,
                 items: null
@@ -77,7 +85,8 @@ export default {
                 //         parent: "adminMenuItem"                    
                 //     }
                 // ]
-            }
+            },
+            message: null
         };
     },
     methods: {
@@ -95,11 +104,16 @@ export default {
         updateUser() {            
             UserService.updateUser(this.currentUser)
                 .then(res => {
-                    this.$store.commit("alert/setUserAlert", { result: res.data.result, message: res.data.message, caption: "Редактирование пользователя" });
-                    this.$router.push({ name: "users" });
+                    if(res.data.result === this.ReqResult.success) {
+                        this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Редактирование пользователя" });
+                        this.$router.push({ name: "users" });
+                    } else if(res.data.result === this.ReqResult.error) {
+                        this.message = res.data.message;
+                    }
                 })
                 .catch(error => {
-                    this.$store.commit("alert/setUserAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Редактирование пользователя" });
+                    // this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Редактирование пользователя" });
+                    this.message = error.response.data.message;
                 });
         }       
     },

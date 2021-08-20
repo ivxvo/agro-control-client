@@ -1,19 +1,9 @@
 <template>
 
-    <div class="left-menu"
-        v-tooltip="{
-            'displayArrow': true,
-            theme: {
-            placement: 'right',
-            //width: 'fit-content',
-            'background-color': 'var(--color-gray)',
-            'color': 'var(--color-black)',
-            'font-size': 'var(--tooltip-font-size)'
-        }
-    }"
-    >
-        <div class="logo" v-tooltip="'Начальная страница'">
-            <router-link to="/">
+    <div class="left-menu">
+        <div class="logo">
+            <q-tooltip anchor="center right" self="center left">Начальная страница</q-tooltip>
+            <router-link to="/dashboards">
                 <font-awesome-icon :icon="['fas', 'seedling']"/>
             </router-link>
         </div>
@@ -22,9 +12,9 @@
                 <li v-for="item in items"
                     :key="item.name"
                     :id="item.name"
-                    :v-tooltip="item.tooltip"
-                    :class="{ active: item.path == currentPath }"
+                    :class="{ active: item.path.startsWith(currentPath) }"
                 >
+                    <q-tooltip anchor="center right" self="center left">{{ item.tooltip }}</q-tooltip>
                     <router-link :to="item.path">
                         <font-awesome-icon :icon="item.img"/>
                     </router-link>
@@ -33,7 +23,8 @@
         </div>
         <div class="logout">
             <ul>
-                <li v-tooltip="'Выйти из системы'">
+                <li>
+                    <q-tooltip anchor="center right" self="center left">Выйти из системы</q-tooltip>
                     <router-link to="/login" @click="logout()">
                         <font-awesome-icon :icon="['fas', 'power-off']"/>
                     </router-link>
@@ -55,7 +46,7 @@ export default {
                 {
                     name: "adminMenuItem",
                     tooltip: "Администрирование",
-                    path: "/users",
+                    path: "/admin/users",
                     img: ["fas", "user-secret"]
                 },
                 {
@@ -119,6 +110,7 @@ export default {
     .left-menu .logout ul {
         list-style: none;
         padding: 0;
+        margin-bottom: 1rem;
     }
 
     .left-menu .menu-items ul li,
@@ -179,14 +171,14 @@ export default {
     }       
 
     .left-menu .logo svg {
-        color: var(--color-theme); /*#009966;*/
+        color: #00b377; /*var(--color-theme); /*#009966;*/
 
         width: 55px;
         height: 55px;
         vertical-align: middle;
         object-fit: contain;
         padding: 7px 0;
-        margin-bottom: 15px;
+        /* margin-bottom: 15px; */
         transform: scale(1);
         transition: all 220ms cubic-bezier(0.2, 0, 0, 1);
     }

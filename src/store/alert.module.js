@@ -1,11 +1,7 @@
+import Alert from "../models/alert.model";
+
 const getDefaultState = () => {
-    return {
-        userAlert: {
-            message: null,
-            result: null,
-            caption: null
-        }
-    };
+    return new Alert();
 };
 
 export const alert = {
@@ -22,10 +18,10 @@ export const alert = {
         resetState(state) {
             Object.assign(state, getDefaultState());
         },
-        setUserAlert(state, alert) {
-            state.userAlert.message = alert.message;
-            state.userAlert.result = alert.result;
-            state.userAlert.caption = alert.caption;
+        setAlert(state, alert) {
+            state.message = alert.message;
+            state.result = alert.result;
+            state.caption = alert.caption;
         }
     }
 };

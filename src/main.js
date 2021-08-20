@@ -8,6 +8,11 @@ import { initGlobals } from "./common/globals.js";
 // Auth
 import { store } from "./store";
 
+// Quasar UI framework
+import "quasar/dist/quasar.prod.css";
+import "quasar/dist/icon-set/fontawesome-v5.umd.prod";
+import { Quasar } from "quasar";
+
 // bootstrap
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -36,20 +41,13 @@ const app = createApp(App);
 
 // globals
 initGlobals(app);
-// app.config.globalProperties.ReqResult = Object.freeze({
-//     success: 1,
-//     error: 2
-// });
-
-// app.config.globalProperties.HttpStatus = Object.freeze({
-//     Unauthorized: 401,
-//     Forbidden: 403,
-//     NotFound: 404,
-//     ServerError: 500
-// });
 
 // vuex-store
 app.use(store);
+
+// quasar
+app.use(Quasar);
+// Quasar.iconSet.set(Quasar.iconSet.fontawesomeV5);
 
 // v-tooltip
 app.directive("tooltip", tooltip);

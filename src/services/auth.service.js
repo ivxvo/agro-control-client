@@ -9,14 +9,20 @@ class AuthService {
             .post(API_URL + "signin", {
                 username: user.username,
                 password: user.password
-            })
-            .then(res => {
-                if(res.data.accessToken) {
-                    localStorage.setItem("user", JSON.stringify(res.data));
-                }
+            }).then(
+                res => {
+                    if(res.data.accessToken) {
+                        localStorage.setItem("user", JSON.stringify(res.data));
+                    } else {
+                        return Promise.reject(res.data);
+                    }
 
-                return res.data;
-            });
+                    return res.data;
+                },
+                error => {
+                    return Promise.reject(error.response.data);
+                }
+            );
     }
 
     logout() {

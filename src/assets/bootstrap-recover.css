@@ -83,7 +83,9 @@ a:hover {
 
 .form-control:focus {
     border-color: var(--color-theme);
-    box-shadow: 0 0 0 0.2rem rgb(0 179 143 / 25%);;
+    border-width: 0.2rem;
+    box-shadow: none;
+    /* box-shadow: 0 0 0 0.2rem rgb(0 179 143 / 25%); */
 }
 
 .btn-light {
@@ -99,3 +101,143 @@ a:hover {
 .modal-footer {
     border: none;
 }
+
+ul {
+    margin: 0;
+}
+
+/*/////////////// QUASAR UI COMPONENTS /////////////////////*/
+
+/* Quasar QSelect */
+/* .page-size svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.page-size span {
+    font-size: 1.1rem;
+}
+
+.page-size .row {    
+    justify-content: flex-end;
+    align-content: center;
+    margin-right: -0.7rem;
+}
+
+.page-size .col {
+    padding-right: 0;
+    padding-left: 0;
+} */
+
+/* Quasar QSelect */ 
+/* .q-field--auto-height .q-field__control, .q-field--auto-height .q-field__native {
+    min-height: 2rem;
+} */
+
+/* .q-select .q-field__control {
+    min-height: auto;
+    height: 3rem;
+} */
+
+/* .q-field--auto-height.q-field--labeled .q-field__control-container {
+    padding-top: 0;
+} */
+
+/* .q-select .q-field__native {
+    padding: 0;
+} */
+
+.q-select svg {
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+}
+
+/* .q-select span {
+    font-size: 1rem;
+    padding: 0;
+} */
+
+.q-select.row, .q-select .row {    
+    /* justify-content: flex-end; */
+    align-content: center;
+    margin: 0;
+}
+
+.q-select .col {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.q-select .q-field__append {
+    width: 1.5rem;
+    padding: 0 0 0 0.5rem;
+}
+
+/*////////////////////////////////////*/
+
+/* Quasar QInput */
+
+.q-input .col {
+    padding: 0;
+}
+
+.q-input.row, .q-input .row {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+.q-input .q-field__label {
+    padding-left: 0;
+}
+
+/* dropdown-input */
+
+.dropdown-input .row {
+    margin: 0;
+    height: 2.45rem;
+    align-content: center;
+}
+
+.dropdown-input .row .q-field__append {
+    justify-content: flex-end;
+}
+
+.dropdown-input .col {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.dropdown-input svg {
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+}
+
+.dropdown-input .q-field__append {
+    width: 1.5rem;
+    padding: 0 0 0 0.5rem;
+}
+.dropdown-input .q-field__control {
+    padding: 0 0.5rem;
+}
+
+.dropdown-input .q-field {
+    font-size: var(--font-size);
+}
+
+/*////////////////////////////////////*/
+
+/* Quasar QBtn */
+
+.btn-signin .q-btn .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.btn-signin .q-btn {
+    width: 100%;
+}
+
+/*////////////////////////////////////*/

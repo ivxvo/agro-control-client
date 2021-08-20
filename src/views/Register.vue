@@ -9,6 +9,14 @@
         <div class="container-fluid">
             <div class="edit-form">
                 <h4>Добавление пользователя</h4>
+                <div v-if="message"
+                    class="alert alert-danger alert-dismissible fade show"
+                >
+                    <span>{{ message }}</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <form @submit.prevent="handleRegister">
                     <div>
                         <div class="form-group">
@@ -92,7 +100,7 @@
 import useVuelidate from "@vuelidate/core";
 import { required, email as pattern, minLength, maxLength } from "@vuelidate/validators";
 
-import User from "../models/user";
+import User from "../models/user.model";
 import AuthService from "../services/auth.service";
 import Sidebar from "../components/Sidebar";
 
@@ -112,7 +120,7 @@ export default {
                     name: "addUserSidebarBackward",             
                     text: "Все пользователи",
                     img: ["fas", "angle-left"],
-                    path: "/users"
+                    path: "/admin/users"
             }
             ,
             items: null
@@ -138,7 +146,8 @@ export default {
     },
     data() {        
         return {
-            user: new User()            
+            user: new User(),
+            message: null
         };
     },
     validations () {
@@ -172,7 +181,7 @@ export default {
 
                     // }
 
-                    this.$store.commit("alert/setUserAlert", { result: res.data.result, message: res.data.message, caption: "Добавление пользователя" });
+                    this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Добавление пользователя" });
                     this.$router.push({ name: "users" });
                 },
                 error => {
@@ -181,15 +190,17 @@ export default {
                     //     error.message ||
                     //     error.toString();
                     // this.successful = false;
-                    console.log(error.response);
+                    // console.log(error.response);
 
                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/userAdd", { result: error.response.data.result, message: error.response.data.message, caption: "Добавление пользователя" });
-                    this.$router.push({ name: "users" });
+                    // this.$store.commit("alert/userAdd", { result: error.response.data.result, message: error.response.data.message, caption: "Добавление пользователя" });
+                    // this.$router.push({ name: "users" });
+
+                    this.message = error.response.data.message;
                 }
             );           
         }

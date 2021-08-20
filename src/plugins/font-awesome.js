@@ -12,7 +12,9 @@ import {
     faUserPlus,
     faUserTag,
     faTrashAlt,
-    faTimes
+    faTimes,
+    faPlusSquare,
+    faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -27,7 +29,9 @@ library.add(
     faUserPlus,
     faUserTag,
     faTrashAlt,
-    faTimes
+    faTimes,
+    faPlusSquare,
+    faPlus
 );
 
 export { FontAwesomeIcon };
