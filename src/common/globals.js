@@ -15,4 +15,19 @@ export function initGlobals(app) {
         text: 1,
         dropdown: 2
     });
+
+    app.config.globalProperties.PermissionSubject = Object.freeze({
+        administration: 1,
+        fields: 2,
+        cropRotation: 3,
+        crop: 4,
+        grow: 5
+    });
+
+    app.config.globalProperties.PermissionAction = Object.freeze({
+        create: 1000,
+        read: 2000,
+        update: 3000,
+        delete: 4000
+    });
 }

@@ -42,7 +42,7 @@
                 </template>
                 <template v-slot:body>
                     <q-input
-                        v-model="currentRole.name"
+                        v-model="activeRole.name"
                         label="Наименование"
                         color="light-blue-7"
                     ></q-input>
@@ -85,17 +85,14 @@
             </div>
 
             <div class="row">            
-                <div class="col-md-3">
+                <div class="col-md-3 pr-5">
                     
                     <Dropdown2
                         class="pb-4"
                         :source="dropdownSource"
-                        field="name"
                         label="Поиск роли"
-                        :filled="false"
                         :hideDropdownIcon="true"
                         :useInput="true"
-                        @input-changed="getFilteredRoleProperty({ field: 'name', value: $event, limit: 5 })"
                         @item-selected="onFilterChanged('roleId', $event)"
                     ></Dropdown2>
 
@@ -103,7 +100,7 @@
                         <li class="list-group-item"
                             v-for="role in roles"
                             :key="role.value"
-                            :class="{ active: role.value === currentRole.id }"
+                            :class="{ active: role.value === activeRole.id }"
                             @click="setActiveRole(role)"
                             @dblclick="showModalEditRole = true"
                         >
@@ -111,6 +108,25 @@
                         </li>
                     </ul>                    
 
+                </div>
+                <div class="col-md-9 pl-5">
+                    <q-tree
+                        ref="permissionTree"
+                        class="pb-5"
+                        :nodes="permissions"
+                        node-key="id"
+                        :icon="iconfasCaretDown" 
+                        v-model:ticked="perms"
+                        tick-strategy="leaf"
+                        control-color="teal"
+                    >                        
+                    </q-tree>
+                    <AccessControl :subject="PermissionSubject.administration">
+                    <button class="btn btn-primary" @click="editRole">
+                        <font-awesome-icon :icon="['fas', 'save']"/>
+                        Сохранить разрешения
+                    </button>
+                    </AccessControl>
                 </div>
             </div>
             
@@ -125,18 +141,23 @@
     import Sidebar from "../components/Sidebar.vue";
     import Modal from "../components/Modal.vue";
     import Dropdown2 from "../components/Dropdown2.vue";
+    import AccessControl from "../components/AccessControlFunc.vue";
 
     import RoleService from "../services/role.service";
+    import { getPermissionTree } from "../common/permissions";
 
     import Role from "../models/role.model";
     import Alert from "../models/alert.model";
+
+    import { fasChevronRight } from "@quasar/extras/fontawesome-v5";
 
     export default {
         name: "Roles",
         components: {
             Sidebar,
             Modal,            
-            Dropdown2
+            Dropdown2,
+            AccessControl
         },
         data() {
             return {
@@ -149,7 +170,6 @@
                     backward: {       
                         name: "rolesSidebarBackward",             
                         text: "Все пользователи",
-                        img: "fas fa-angle-left",
                         path: "/admin/users"
                     },
                     items: [                                
@@ -161,18 +181,26 @@
                         },
                         
                     ]
-                },                
+                },   
+                permissions: getPermissionTree(this),             
                 roles: null,
-                currentRole: new Role(),
+                activeRole: new Role(),
                 roleAlert: new Alert(),
                 showModalAddRole: false,
                 showModalEditRole: false,
                 creatingRole: new Role(),
                 dropdownOptions: null,
                 filter: {},
-                dropdownSource: []
+                dropdownSource: [],
+                iconfasCaretDown: fasChevronRight,
+                perms: []
             }
-        },        
+        },
+        watch: {
+            ticked(val) {
+                console.log(`ticked: ${val}`);
+            }
+        },
         methods: {
             addRole() {
                 RoleService.addRole(this.creatingRole).then(
@@ -193,7 +221,11 @@
                 this.showModalAddRole = false;
             },
             editRole() {
-                RoleService.updateRole(this.currentRole).then(
+                if(!this.activeRole.id) {
+                    return;
+                }
+                this.activeRole.permissions = this.perms;
+                RoleService.updateRole(this.activeRole).then(
                     res => {
                         this.roleAlert = { result: res.data.result, message: res.data.message, caption: "Редактирование роли" };
                         this.getRoles();
@@ -211,7 +243,7 @@
                 this.showModalEditRole = false;
             },
             deleteRole() {
-                RoleService.deleteRole(this.currentRole).then(
+                RoleService.deleteRole(this.activeRole).then(
                     res => {
                         this.roleAlert = { result: res.data.result, message: res.data.message, caption: "Удаление роли" };
                         this.getRoles();
@@ -229,7 +261,9 @@
                 this.showModalEditRole = false;
             },
             setActiveRole(role) {
-                this.currentRole = role;
+                this.activeRole.id = role.value;
+                this.activeRole.name = role.label;
+                this.activeRole.permissions = role.permissions;
             },
             getRoles() {
                 const params = {
@@ -295,6 +329,7 @@
         },        
         mounted() {
             this.getRoles().then(data => this.dropdownSource = data);
+            this.$refs.permissionTree.expandAll();
         }
     }
 

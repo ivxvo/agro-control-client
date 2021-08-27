@@ -241,3 +241,17 @@ ul {
 }
 
 /*////////////////////////////////////*/
+
+/* Quasar QTree */
+
+.q-tree .row>* {
+    width: auto;
+    padding: 0 0.3rem;
+    margin: 0;
+}
+
+.q-tree__node:after {
+    left: -28px;
+}
+
+/*////////////////////////////////////*/

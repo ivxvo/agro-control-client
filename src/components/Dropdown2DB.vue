@@ -27,10 +27,7 @@
 <script>
 // https://ctnicholas.medium.com/create-a-searchable-dropdown-list-in-vue-js-139dd064e845
 
-import { fasTimes } from "@quasar/extras/fontawesome-v5";
-
-import { fasChevronDown } from "@quasar/extras/fontawesome-v5";
-
+import { fasTimes, fasChevronDown } from "@quasar/extras/fontawesome-v5";
 
 export default {
     name: "Dropdown2DB",
