@@ -30,12 +30,7 @@ class AuthService {
     }
 
     register(user) {
-        return axios.post(API_URL + "signup", {
-            username: user.username,
-            email: user.email,
-            password: user.password
-        },
-        { headers: authHeader() })        
+        return axios.post(API_URL + "signup", user, { headers: authHeader() });
     }
 
     verify() {

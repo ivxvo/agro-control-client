@@ -116,17 +116,15 @@
                         :nodes="permissions"
                         node-key="id"
                         :icon="iconfasCaretDown" 
-                        v-model:ticked="perms"
+                        v-model:ticked="activeRole.permissions"
                         tick-strategy="leaf"
                         control-color="teal"
                     >                        
                     </q-tree>
-                    <AccessControl :subject="PermissionSubject.administration">
                     <button class="btn btn-primary" @click="editRole">
                         <font-awesome-icon :icon="['fas', 'save']"/>
                         Сохранить разрешения
                     </button>
-                    </AccessControl>
                 </div>
             </div>
             
@@ -141,7 +139,6 @@
     import Sidebar from "../components/Sidebar.vue";
     import Modal from "../components/Modal.vue";
     import Dropdown2 from "../components/Dropdown2.vue";
-    import AccessControl from "../components/AccessControlFunc.vue";
 
     import RoleService from "../services/role.service";
     import { getPermissionTree } from "../common/permissions";
@@ -156,8 +153,7 @@
         components: {
             Sidebar,
             Modal,            
-            Dropdown2,
-            AccessControl
+            Dropdown2
         },
         data() {
             return {
@@ -192,15 +188,9 @@
                 dropdownOptions: null,
                 filter: {},
                 dropdownSource: [],
-                iconfasCaretDown: fasChevronRight,
-                perms: []
+                iconfasCaretDown: fasChevronRight
             }
-        },
-        watch: {
-            ticked(val) {
-                console.log(`ticked: ${val}`);
-            }
-        },
+        },        
         methods: {
             addRole() {
                 RoleService.addRole(this.creatingRole).then(
@@ -224,7 +214,6 @@
                 if(!this.activeRole.id) {
                     return;
                 }
-                this.activeRole.permissions = this.perms;
                 RoleService.updateRole(this.activeRole).then(
                     res => {
                         this.roleAlert = { result: res.data.result, message: res.data.message, caption: "Редактирование роли" };
@@ -263,7 +252,7 @@
             setActiveRole(role) {
                 this.activeRole.id = role.value;
                 this.activeRole.name = role.label;
-                this.activeRole.permissions = role.permissions;
+                this.activeRole.permissions = role.permissions ? role.permissions : [];
             },
             getRoles() {
                 const params = {

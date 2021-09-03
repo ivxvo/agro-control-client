@@ -1,22 +1,26 @@
-<template>
-    <div v-if="hasPermission">
-        <slot/>
-    </div>
-</template>
-
 <script>
-export default {
-    name: "AccessControl",
-    props: {
-        permission: {
+    
+    import { store } from "../store";
+
+    const AccessControl = (props, context) => {
+        console.log(store);
+        if(store.state.auth.user.permissions.includes(props.subject + props.action)) {
+            return context.slots.default();
+        }
+    };
+
+    AccessControl.props = {
+        subject: {
+            type: Number,
+            default: 0
+        },
+        action: {
             type: Number,
             default: 0
         }
-    },
-    computed: {        
-        hasPermission() {
-            return this.$store.state.auth.user.permissions.includes(this.permission);
-        }
-    }
-}
+    };
+
+    export default AccessControl;
+
 </script>
+ 

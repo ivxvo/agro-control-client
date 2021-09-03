@@ -14,7 +14,13 @@ export const getPermissionTree = (app) => {
         {
             label: "Администрирование",
             id: app.PermissionSubject.administration,
-            icon: fasUserSecret
+            icon: fasUserSecret,
+            // children: [
+            //     {
+            //         label: "adm",
+            //         icon:fasBookOpen
+            //     }
+            // ]
         },
         {
             label: "Севооборот",

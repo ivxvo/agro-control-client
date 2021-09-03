@@ -1,15 +1,38 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { routes } from "./routes.js";
-import { checkAuthorization, toggleSidebar } from "./common/beforeEachRoute.js";
+import { getRoutes } from "./routes.js";
+import { checkAuthorization, toggleSidebar, checkPermission } from "./common/beforeEachRoute.js";
 
-const router = createRouter({
-    history: createWebHistory(),  
-    routes: routes
-});
 
-router.beforeEach((to, from, next) => {
-    checkAuthorization(to, next);
-    toggleSidebar(to);
-});
+// const router = createRouter({
+//     history: createWebHistory(),  
+//     routes: getRoutes()
+// });
 
-export { router };
+// router.beforeResolve(to => {
+//     checkPermission(to);
+// });
+
+// router.beforeEach((to) => {
+//     checkAuthorization(to);
+//     toggleSidebar(to);
+// });
+
+// export { router };
+
+export const getRouter = (subject, action) => {
+    const router = createRouter({
+        history: createWebHistory(),  
+        routes: getRoutes(subject, action)
+    });
+
+    router.beforeEach(to => {
+        checkAuthorization(to);
+        return checkPermission(to);
+    });
+
+    router.beforeResolve(to => {
+        toggleSidebar(to);         
+    });
+
+    return router;
+}

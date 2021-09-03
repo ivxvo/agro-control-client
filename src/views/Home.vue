@@ -3,20 +3,28 @@
         <header class="jumbotron">
             <h3>{{content}}</h3>
         </header>
+        <button @click="show">show</button>
     </div>
 </template>
 
 <script>
-// import UserService from "../services/user.service";
+import { useQuasar } from "quasar";
+
 export default {
     name: "Home",
     data() {
         return {
-            content: "Графики"
+            content: "Графики",
+            $q: useQuasar()
         };
     },
+    methods: {
+        show() {
+            this.$q.notify("LOADED!!!");
+        }
+    },
     mounted() {
-        this.$store.commit("menu/showSidebar", false);
+        // this.$store.commit("menu/showSidebar", false);
         // console.log(`show: ${this.$store.state.menu.showedSidebar}`);
 
         // UserService.getPublicContent().then(

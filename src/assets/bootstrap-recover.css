@@ -109,43 +109,6 @@ ul {
 /*/////////////// QUASAR UI COMPONENTS /////////////////////*/
 
 /* Quasar QSelect */
-/* .page-size svg {
-    width: 1rem;
-    height: 1rem;
-}
-
-.page-size span {
-    font-size: 1.1rem;
-}
-
-.page-size .row {    
-    justify-content: flex-end;
-    align-content: center;
-    margin-right: -0.7rem;
-}
-
-.page-size .col {
-    padding-right: 0;
-    padding-left: 0;
-} */
-
-/* Quasar QSelect */ 
-/* .q-field--auto-height .q-field__control, .q-field--auto-height .q-field__native {
-    min-height: 2rem;
-} */
-
-/* .q-select .q-field__control {
-    min-height: auto;
-    height: 3rem;
-} */
-
-/* .q-field--auto-height.q-field--labeled .q-field__control-container {
-    padding-top: 0;
-} */
-
-/* .q-select .q-field__native {
-    padding: 0;
-} */
 
 .q-select svg {
     width: 1rem;
@@ -153,13 +116,7 @@ ul {
     padding: 0;
 }
 
-/* .q-select span {
-    font-size: 1rem;
-    padding: 0;
-} */
-
 .q-select.row, .q-select .row {    
-    /* justify-content: flex-end; */
     align-content: center;
     margin: 0;
 }
@@ -172,6 +129,10 @@ ul {
 .q-select .q-field__append {
     width: 1.5rem;
     padding: 0 0 0 0.5rem;
+}
+
+.q-select .q-field__label {
+    padding-left: 0;
 }
 
 /*////////////////////////////////////*/
@@ -188,8 +149,24 @@ ul {
     margin-bottom: 0;
 }
 
+.q-input .q-field__append {
+    justify-content: flex-end;
+    width: 1.5rem;
+    padding: 0 0 0 0.5rem;
+}
+
+.q-input svg {
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+}
+
 .q-input .q-field__label {
     padding-left: 0;
+}
+
+.q-input .q-field__messages.col {
+    position: inherit;
 }
 
 /* dropdown-input */
@@ -244,14 +221,18 @@ ul {
 
 /* Quasar QTree */
 
-.q-tree .row>* {
-    width: auto;
-    padding: 0 0.3rem;
+.q-tree .row {
     margin: 0;
 }
 
-.q-tree__node:after {
-    left: -28px;
+.q-tree .row>* {
+    width: auto;
+    padding: 0 0.2rem;
+    margin: 0;
+}
+
+.q-tree>.q-tree__node--child>.q-tree__node-header {
+    padding-left: 1.55rem;
 }
 
 /*////////////////////////////////////*/

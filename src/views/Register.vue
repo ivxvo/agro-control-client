@@ -1,4 +1,6 @@
 <template>
+<div>
+
    <Sidebar
         :header="sidebar.header"
         :backward="sidebar.backward"
@@ -18,81 +20,57 @@
                     </button>
                 </div>
                 <form @submit.prevent="handleRegister">
-                    <div>
-                        <div class="form-group">
-                            <label for="username">Имя</label>
-                            <input
-                                v-model="user.username"
-                                type="text"
-                                class="form-control"
-                                name="username"
-                            />
-                            <div v-if="v$.user.username.$error"
-                                class="alert-danger">
-                                <template v-if="v$.user.username.required.$invalid">
-                                    Имя обязательно для заполнения
-                                </template>
-                                <template v-else-if="v$.user.username.minLength.$invalid">
-                                    Длина имени не должна быть менее {{v$.user.username.minLength.$params.min}} символов
-                                </template>
-                                <template v-else-if="v$.user.username.maxLength.$invalid">
-                                    Длина имени не должна превышать {{v$.user.username.maxLength.$params.max}} символов
-                                </template>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Адрес эл. почты</label>
-                            <input
-                                v-model="user.email"
-                                type="email"
-                                class="form-control"
-                                name="email"
-                            />
-                            <div v-if="v$.user.email.$error"
-                                class="alert-danger">
-                                <template v-if="v$.user.email.required.$invalid">
-                                    Адрес эл. почты обязателен для заполнения
-                                </template>
-                                <template v-else-if="v$.user.email.pattern.$invalid">
-                                    Адрес эл. почты не корректен
-                                </template>                           
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Пароль</label>
-                            <input
-                                v-model="user.password"
-                                type="password"
-                                class="form-control"
-                                name="password"
-                            />
-                            <div v-if="v$.user.password.$error"
-                                class="alert-danger">
-                                <template v-if="v$.user.password.required.$invalid">
-                                    Пароль обязателен для заполнения
-                                </template>
-                                <template v-else-if="v$.user.password.minLength.$invalid">
-                                    Пароль не должен быть менее {{v$.user.password.minLength.$params.min}} символов
-                                </template>
-                                <template v-else-if="v$.user.password.maxLength.$invalid">
-                                    Пароль не должен превышать {{v$.user.password.maxLength.$params.max}} символов
-                                </template>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-primary">Добавить</button>
-                        </div>
-                    </div>
-                </form>
-            </div>           
+                    <div class="mt-5 mb-3">
+                        <q-input    
+                            class="mb-3"                        
+                            v-model="user.username"
+                            label="Имя"
+                            color="light-blue-7"
+                            filled
+                            no-error-icon
+                            :error-message="errorMsgUsername"
+                            :error="v$.user.username.$error"
+                        ></q-input>                  
+                        <q-input
+                            class="mb-3" 
+                            type="password"
+                            v-model="user.password"
+                            label="Пароль"
+                            color="light-blue-7"
+                            filled
+                            no-error-icon
+                            :error-message="errorMsgPwd"
+                            :error="v$.user.password.$error"
+                        ></q-input> 
+                        <q-input
+                            class="mb-3" 
+                            type="email"
+                            v-model="user.email"
+                            label="Адрес эл. почты"
+                            color="light-blue-7"
+                            filled
+                            no-error-icon
+                            :error-message="errorMsgEmail"
+                            :error="v$.user.email.$error"
+                        ></q-input>
 
-            <!-- <div
-                v-if="message"
-                class="alert"
-                :class="successful ? 'alert-success' : 'alert-danger'"
-            >{{message}}</div> -->
+                        <Dropdown2
+                            class="pb-4"
+                            :source="roles"
+                            label="Роль"
+                            :filled="true"
+                            :useInput="true"
+                            @item-selected="onItemSelected('roleId', $event)"
+                        ></Dropdown2>
+                    </div>
+                    
+                    <button class="btn btn-primary">Добавить</button>
+                </form>
+            </div>                      
         </div>
     </div>
+
+</div>    
 </template>
 
 <script>
@@ -101,53 +79,39 @@ import useVuelidate from "@vuelidate/core";
 import { required, email as pattern, minLength, maxLength } from "@vuelidate/validators";
 
 import User from "../models/user.model";
+
 import AuthService from "../services/auth.service";
+import RoleService from "../services/role.service";
+
 import Sidebar from "../components/Sidebar";
+import Dropdown2 from "../components/Dropdown2.vue";
 
 export default {
     name: "Register",
     components: {
-        Sidebar
-    },
-    setup() {
-        const sidebar = {
-            header: {       
-                name: "addUserSidebarHeader",             
-                text: "Пользователь",
-                description: "Добавление пользователя"
-            },
-            backward: {       
-                    name: "addUserSidebarBackward",             
-                    text: "Все пользователи",
-                    img: ["fas", "angle-left"],
-                    path: "/admin/users"
-            }
-            ,
-            items: null
-            // [                                
-            //     {
-            //         name: "addUserSidebarItem",
-            //         text: "Добавить пользователя",
-            //         img: "fas fa-user-plus",
-            //         path: "/register",
-            //         parent: "adminMenuItem"
-            //     },
-            //     {
-            //         name: "rolesSidebarItem",
-            //         text: "Роли",
-            //         img: "fas fa-user-tag",
-            //         path: "",
-            //         parent: "adminMenuItem"                    
-            //     }
-            // ]
-        }
-
-        return { v$: useVuelidate(), sidebar }
-    },
+        Sidebar,
+        Dropdown2
+    },    
     data() {        
         return {
+            v$: useVuelidate(),
             user: new User(),
-            message: null
+            message: null,
+            roles: null,
+            sidebar: {
+                header: {       
+                    name: "addUserSidebarHeader",             
+                    text: "Пользователь",
+                    description: "Добавление пользователя"
+                },
+                backward: {       
+                        name: "addUserSidebarBackward",             
+                        text: "Все пользователи",
+                        img: ["fas", "angle-left"],
+                        path: "/admin/users"
+                },
+                items: null            
+            }
         };
     },
     validations () {
@@ -162,49 +126,76 @@ export default {
     computed: {
         loggedIn() {
             return this.$store.state.auth.status.loggedIn;
+        },
+        errorMsgUsername() {
+            if(this.v$.user.username.required.$invalid) {
+                return "Имя обязательно для заполнения";
+            } else if(this.v$.user.username.minLength.$invalid) {
+                return `Длина имени должна быть не менее ${this.v$.user.username.minLength.$params.min} символов`;
+            } else if(this.v$.user.username.maxLength.$invalid) {
+                return `Длина имени не должна превышать ${this.v$.user.username.maxLength.$params.max} символов`;
+            } else return null;
+        },
+        errorMsgPwd() {
+            if(this.v$.user.password.required.$invalid) {
+                return "Пароль обязателен для заполнения";
+            } else if(this.v$.user.password.minLength.$invalid) {
+                return `Длина пароля должна быть не менее ${this.v$.user.password.minLength.$params.min} символов`;
+            } else if(this.v$.user.password.maxLength.$invalid) {
+                return `Длина пароля не должна превышать ${this.v$.user.password.maxLength.$params.max} символов`;
+            } else return null;
+        },
+        errorMsgEmail() {
+            if(this.v$.user.email.required.$invalid) {
+                return "Адрес эл. почты обязателен для заполнения";
+            } else if(this.v$.user.email.pattern.$invalid) {
+                return "Неверный формат адреса эл. почты";
+            } else return null;
         }
     },    
     methods: {
         handleRegister() {
-            // this.message = "";
-
             this.v$.$touch();
             if(this.v$.$error) return;
 
-            // this.$store.dispatch("auth/register", this.user).then(
-                AuthService.register(this.user).then(
-                res => {
-                    // this.message = data.message;
-                    // this.successful = true;
-                    console.log(res.data.message);
-                    // if(res.data.result === this.ReqResult.error) {
-
-                    // }
-
+            AuthService.register(this.user).then(
+                res => {                  
                     this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Добавление пользователя" });
                     this.$router.push({ name: "users" });
                 },
-                error => {
-                    // this.message =
-                    //     (error.response && error.response.data) ||
-                    //     error.message ||
-                    //     error.toString();
-                    // this.successful = false;
-                    // console.log(error.response);
+                error => {                   
+                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        this.$store.dispatch("auth/logout");
+                        this.$router.push({ name: "login" });
+                    }                  
 
+                    this.message = error.response.data.message;
+                }
+            );           
+        },
+        getRoles() {
+            RoleService.getRoles().then(
+                res => {
+                    this.roles = res.data;
+                },
+                error => {
                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    // this.$store.commit("alert/userAdd", { result: error.response.data.result, message: error.response.data.message, caption: "Добавление пользователя" });
-                    // this.$router.push({ name: "users" });
-
-                    this.message = error.response.data.message;
+                    this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Получение списка ролей" };
                 }
-            );           
+            );
+        },
+        onItemSelected(field, value) {
+            this.user[field] = value;
         }
+    },
+    mounted() {
+        this.getRoles();
     }
+
 };
 </script>
 

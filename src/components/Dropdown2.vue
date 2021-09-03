@@ -35,7 +35,10 @@ export default {
     emits: ["item-selected"],
     props: {
         source: Array,
-        field: String,
+        selected: {
+            type: Object,
+            default: null
+        },
         label: String,
         placeholder: String,        
         multiple: {
@@ -67,7 +70,7 @@ export default {
         return {                      
             iconfasChevronDown: fasChevronDown,
             iconfasTimes: fasTimes,
-            selectedItems: null,
+            selectedItems: this.selected,
             opts: []
         }
     },       
@@ -82,13 +85,16 @@ export default {
             }
 
             this.$emit("item-selected", id);
+        },
+        selected(val) {
+            this.selectedItems = val;
         }       
     },
     methods: {
         filter(val, update, abort) {
             if(val.length < 3) {
                 if(val == "") {
-                    this.opts = this.source;
+                    update(() => this.opts = this.source);
                 }
 
                 abort();

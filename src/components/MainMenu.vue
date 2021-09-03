@@ -8,17 +8,18 @@
             </router-link>
         </div>
         <div class="menu-items">
-            <ul>
-                <li v-for="item in items"
-                    :key="item.name"
-                    :id="item.name"
-                    :class="{ active: item.path.startsWith(currentPath) }"
-                >
-                    <q-tooltip anchor="center right" self="center left">{{ item.tooltip }}</q-tooltip>
-                    <router-link :to="item.path">
-                        <font-awesome-icon :icon="item.img"/>
-                    </router-link>
-                </li>
+            <ul>                    
+                <AccessControl :subject="item.permission" v-for="item in items" :key="item.name">
+                    <li
+                        :id="item.name"
+                        :class="{ active: currentPath && item.path.startsWith('/' + currentPath) }"
+                    >
+                        <q-tooltip anchor="center right" self="center left">{{ item.tooltip }}</q-tooltip>
+                        <router-link :to="item.path">
+                            <font-awesome-icon :icon="item.img"/>
+                        </router-link>
+                    </li>
+                </AccessControl>
             </ul>
         </div>
         <div class="logout">
@@ -37,8 +38,13 @@
 
 <script>
 
+import AccessControl from "../components/AccessControl.vue";
+
 export default {
-    name: "MainMenu",   
+    name: "MainMenu", 
+    components: {
+        AccessControl
+    },
     data() {
         return {
             selected: null,
@@ -47,13 +53,15 @@ export default {
                     name: "adminMenuItem",
                     tooltip: "Администрирование",
                     path: "/admin/users",
-                    img: ["fas", "user-secret"]
+                    img: ["fas", "user-secret"],
+                    permission: this.PermissionSubject.administration
                 },
                 {
                     name: "cropRotationMenuItem",
                     tooltip: "Севооборот",
                     path: "/crop-rotation",
-                    img: ["fas", "crop-alt"]
+                    img: ["fas", "crop-alt"],
+                    permission: this.PermissionSubject.crop + this.PermissionAction.read
                 },
                 
             ]
@@ -64,7 +72,7 @@ export default {
             return this.$store.state.auth.status.loggedIn;
         },
         currentPath() {
-            return "/" + this.$route.path.split("/")[1];            
+            return this.$route.path.split("/")[1];            
         }
     },
     methods: {

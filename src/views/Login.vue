@@ -1,27 +1,14 @@
 <template>
     <div class="col-md-12">
-        <div class="card card-container">
-            <!-- <img
-                id="profile-img"
-                src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-                class="profile-img-card"
-            /> -->
+        <div class="card card-container">            
             <div class="login-title">
                 <div class="logo">
                     <font-awesome-icon :icon="['fas', 'seedling']"/>
                 </div>
                 <div class="login-title-text">Киберсофт.Агроконтроль</div>
             </div>
-            <form @submit.prevent="handleLogin">
-                <!-- <div class="form-group"> -->
-                    <!-- <label for="username">Имя</label>
-                    <input
-                        type="text"
-                        name="username"
-                        class="form-control"
-                        v-model="user.username"
-                    /> -->
-                <div v-if="message"
+            <form @submit.prevent="handleLogin">                
+                <div v-show="message"
                     class="alert alert-danger alert-dismissible fade show"
                 >
                     <h5>Авторизация</h5>
@@ -35,53 +22,20 @@
                         v-model="user.username"
                         label="Имя"
                         color="light-blue-7"
-                    ></q-input>
-                    <div
-                        v-if="v$.user.username.$error"
-                        class="alert-danger"
-                    >
-                        <template v-if="v$.user.username.required.$invalid">
-                            Имя обязательно для заполнения
-                        </template>
-                        <template v-else-if="v$.user.username.minLength.$invalid">
-                            Длина имени должна быть не менее {{ v$.user.username.minLength.$params.min }} символов
-                        </template>
-                        <template v-else-if="v$.user.username.maxLength.$invalid">
-                            Длина имени не должна превышать {{ v$.user.username.maxLength.$params.max }} символов
-                        </template>
-                    </div>                    
-                <!-- </div> -->
-                <!-- <div class="form-group"> -->
-                    <!-- <label for="password">Пароль</label>
-                    <input
-                        type="password"
-                        name="password"
-                        class="form-control"
-                        v-model="user.password"
-                    /> -->
-
+                        no-error-icon
+                        :error-message="errorMsgUsername"
+                        :error="v$.user.username.$error"
+                    ></q-input>                  
                     <q-input
                         type="password"
                         v-model="user.password"
                         label="Пароль"
                         color="light-blue-7"
                         @keydown.enter="handleLogin"
-
-                    ></q-input>
-                    <div
-                        v-if="v$.user.password.$error"
-                        class="alert-danger"
-                    >
-                        <template v-if="v$.user.password.required.$invalid">
-                            Пароль обязателен для заполнения
-                        </template>
-                        <template v-if="v$.user.password.minLength.$invalid">
-                            Пароль не должен быть менее {{ v$.user.password.minLength.$params.min }} символов
-                        </template>
-                        <template v-if="v$.user.password.maxLength.$invalid">
-                            Пароль не должен превышать {{ v$.user.password.maxLength.$params.max }} символов
-                        </template>
-                    </div>
+                        no-error-icon
+                        :error-message="errorMsgPwd"
+                        :error="v$.user.password.$error"
+                    ></q-input>                   
                 </div>
 
                 <!-- </div> -->
@@ -100,10 +54,7 @@
                     @click="handleLogin"
                 >
                 </q-btn>
-                </div>
-                <!-- <div class="form-group">
-                    <div v-if="message" class="alert alert-danger" role="alert">{{message}}</div>
-                </div> -->
+                </div>                
             </form>
         </div>
     </div>
@@ -121,16 +72,20 @@ import { required, minLength, maxLength } from "@vuelidate/validators";
 
 import User from "../models/user.model";
 
+import { fasExclamationCircle } from "@quasar/extras/fontawesome-v5";
+
 export default {
     name: "Login",
-    setup() {
-        return { v$: useVuelidate() }
-    },
+    // setup() {
+    //     return { v$: useVuelidate() }
+    // },
     data() {
         return {
+            v$: useVuelidate(),
             user: new User('', '', ''),
             loading: false,
-            message: null
+            message: null,
+            iconfasExclamationCircle: fasExclamationCircle
         };
     },
     validations() {
@@ -144,6 +99,24 @@ export default {
     computed: {
         loggedIn() {
             return this.$store.state.auth.status.loggedIn;
+        },
+        errorMsgUsername() {
+            if(this.v$.user.username.required.$invalid) {
+                return "Имя обязательно для заполнения";
+            } else if(this.v$.user.username.minLength.$invalid) {
+                return `Длина имени должна быть не менее ${this.v$.user.username.minLength.$params.min} символов`;
+            } else if(this.v$.user.username.maxLength.$invalid) {
+                return `Длина имени не должна превышать ${this.v$.user.username.maxLength.$params.max} символов`;
+            } else return null;
+        },
+        errorMsgPwd() {
+            if(this.v$.user.password.required.$invalid) {
+                return "Пароль обязателен для заполнения";
+            } else if(this.v$.user.password.minLength.$invalid) {
+                return `Длина пароля должна быть не менее ${this.v$.user.password.minLength.$params.min} символов`;
+            } else if(this.v$.user.password.maxLength.$invalid) {
+                return `Длина пароля не должна превышать ${this.v$.user.password.maxLength.$params.max} символов`;
+            } else return null;
         }
     },
     created() {
@@ -152,34 +125,25 @@ export default {
         }
     },
     methods: {
-        handleLogin() {
-            // this.loading = true;
-
-            // this.$validator.validateAll().then(isValid => {
-            //     if(!isValid) {
-            //         this.loading = false;
-            //         return;
-            //     }
-
+        handleLogin() {            
             this.v$.$touch();
             if(this.v$.$error) return;
 
-                if(this.user.username && this.user.password) {
-                    this.$store.dispatch("auth/login", this.user).then(
-                        () => {                            
-                            this.$router.push("/dashboards");
-                        },
-                        error => {
-                            this.loading = false;
-                            if(error.status == this.HttpStatus.NotFound) {
-                                this.message = `Пользователь '${this.user.username}' не найден.`;
-                            } else {
-                                this.message = error.message;
-                            }
+            if(this.user.username && this.user.password) {
+                this.$store.dispatch("auth/login", this.user).then(
+                    () => {                            
+                        this.$router.push("/dashboards");
+                    },
+                    error => {
+                        this.loading = false;
+                        if(error.status == this.HttpStatus.NotFound) {
+                            this.message = `Пользователь '${this.user.username}' не найден`;
+                        } else {
+                            this.message = error.message;
                         }
-                    )
-                }
-            // })
+                    }
+                )
+            }
         }
     }
 }
