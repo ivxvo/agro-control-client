@@ -67,44 +67,30 @@
                 <div class="col-md-6">
                     <h5 class="pb-4">Список ролей</h5>
                 </div>
-            </div>
-            
-            <div class="row">            
-                <div class="col-md-12">
-                    <div v-show="roleAlert.result"
-                        class="alert alert-dismissible fade show"
-                        :class="{ 'alert-success': roleAlert.result === ReqResult.success, 'alert-danger': roleAlert.result === ReqResult.error }"
-                    >
-                        <h5>{{ roleAlert.caption }}</h5>
-                        <span>{{ roleAlert.message }}</span>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </div>                      
 
             <div class="row">            
                 <div class="col-md-3 pr-5">
                     
-                    <Dropdown2
+                    <Dropdown2DB
                         class="pb-4"
-                        :source="dropdownSource"
+                        :getData="getFilteredRoleProperty"
+                        field="name"
                         label="Поиск роли"
                         :hideDropdownIcon="true"
                         :useInput="true"
                         @item-selected="onFilterChanged('roleId', $event)"
-                    ></Dropdown2>
+                    ></Dropdown2DB>
 
                     <ul class="list-group">
                         <li class="list-group-item"
                             v-for="role in roles"
                             :key="role.value"
-                            :class="{ active: role.value === activeRole.id }"
+                            :class="{ active: role.id === activeRole.id }"
                             @click="setActiveRole(role)"
                             @dblclick="showModalEditRole = true"
                         >
-                            {{ role.label }}
+                            {{ role.name }}
                         </li>
                     </ul>                    
 
@@ -138,22 +124,23 @@
 
     import Sidebar from "../components/Sidebar.vue";
     import Modal from "../components/Modal.vue";
-    import Dropdown2 from "../components/Dropdown2.vue";
+    import Dropdown2DB from "../components/Dropdown2DB.vue";
 
     import RoleService from "../services/role.service";
-    import { getPermissionTree } from "../common/permissions";
+    import { permissionTree } from "../common/permissions";
 
     import Role from "../models/role.model";
     import Alert from "../models/alert.model";
 
     import { fasChevronRight } from "@quasar/extras/fontawesome-v5";
+    import { notify } from "../plugins/notify";
 
     export default {
         name: "Roles",
         components: {
             Sidebar,
             Modal,            
-            Dropdown2
+            Dropdown2DB
         },
         data() {
             return {
@@ -178,54 +165,49 @@
                         
                     ]
                 },   
-                permissions: getPermissionTree(this),             
+                permissions: permissionTree,             
                 roles: null,
                 activeRole: new Role(),
                 roleAlert: new Alert(),
                 showModalAddRole: false,
                 showModalEditRole: false,
                 creatingRole: new Role(),
-                dropdownOptions: null,
                 filter: {},
                 dropdownSource: [],
-                iconfasCaretDown: fasChevronRight
+                iconfasCaretDown: fasChevronRight                
             }
         },        
         methods: {
             addRole() {
                 RoleService.addRole(this.creatingRole).then(
                     res => {
-                        this.roleAlert = { result: res.data.result, message: res.data.message, caption: "Создание роли" };
+                        notify({ type: res.data.result, msg: res.data.message });
                         this.getRoles();
                     },
                     error => {
-                        if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                             this.$store.dispatch("auth/logout");
                             this.$router.push({ name: "login" });
                         }
-
-                        this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Создание роли" };
+                        notify({ type: error.response.data.result, msg: error.response.data.message });
                     }
                 );
-
+                this.creatingRole = new Role();
                 this.showModalAddRole = false;
             },
-            editRole() {
-                if(!this.activeRole.id) {
-                    return;
-                }
+            editRole() {                
                 RoleService.updateRole(this.activeRole).then(
                     res => {
-                        this.roleAlert = { result: res.data.result, message: res.data.message, caption: "Редактирование роли" };
+                        notify({ type: res.data.result, msg: res.data.message });
                         this.getRoles();
                     },
                     error => {
-                        if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                             this.$store.dispatch("auth/logout");
                             this.$router.push({ name: "login" });
                         }
 
-                        this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Редактирование роли" };
+                        notify({ type: error.response.data.result, msg: error.response.data.message });
                     }
                 );
 
@@ -234,37 +216,36 @@
             deleteRole() {
                 RoleService.deleteRole(this.activeRole).then(
                     res => {
-                        this.roleAlert = { result: res.data.result, message: res.data.message, caption: "Удаление роли" };
+                        notify({ type: res.data.result, msg: res.data.message });
                         this.getRoles();
                     },
                     error => {
-                        if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                             this.$store.dispatch("auth/logout");
                             this.$router.push({ name: "login" });
                         }
 
-                        this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Удаление роли" };
+                        notify({ type: error.response.data.result, msg: error.response.data.message });
                     }
                 );
 
                 this.showModalEditRole = false;
             },
-            setActiveRole(role) {
-                this.activeRole.id = role.value;
-                this.activeRole.name = role.label;
+            setActiveRole(role) {               
+                this.activeRole = role;
                 this.activeRole.permissions = role.permissions ? role.permissions : [];
             },
             getRoles() {
                 const params = {
-                    filter: this.filter
+                    filter: this.filter,
+                    permissions: true
                 };
-                return RoleService.getRoles(params).then(
+                RoleService.getRoles(params).then(
                     res => {
                         this.roles = res.data;
-                        return res.data;
                     },
                     error => {
-                        if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                             this.$store.dispatch("auth/logout");
                             this.$router.push({ name: "login" });
                         }
@@ -274,37 +255,7 @@
                 );
             },
             getFilteredRoleProperty(params) {
-                return RoleService.getFilteredRoleProperty(params);
-                // .then(
-                //     res => {
-                //         this.$store.commit("dropdown/setDropdownData", res.data);   
-                //         this.dropdownOptions = res.data;                
-                //     })
-                // .catch(
-                //     error => {
-                //         if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
-                //             this.$store.dispatch("auth/logout");
-                //             this.$router.push({ name: "login" });
-                //         }
-
-                //        this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Получение атрибута фильтрации" };
-                //     }
-                // );
-
-                // RoleService.getFilteredRoleProperty(params).then(
-                //     res => {
-                //         this.$store.commit("dropdown/setDropdownData", res.data);   
-                //         this.dropdownOptions = res.data;                
-                //     },
-                //     error => {
-                //         if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
-                //             this.$store.dispatch("auth/logout");
-                //             this.$router.push({ name: "login" });
-                //         }
-
-                //        this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Получение атрибута фильтрации" };
-                //     }
-                // );
+                return RoleService.getFilteredRoleProperty(params);                
             },
             onFilterChanged(field, value) {
                 if(value == null) {
@@ -317,7 +268,7 @@
             }
         },        
         mounted() {
-            this.getRoles().then(data => this.dropdownSource = data);
+            this.getRoles();
             this.$refs.permissionTree.expandAll();
         }
     }

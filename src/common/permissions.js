@@ -1,3 +1,5 @@
+import { PermissionSubject, PermissionAction } from "../common/globals";
+
 import {
     fasUserSecret,
     fasCropAlt,
@@ -9,11 +11,10 @@ import {
     fabNutritionix
 } from "@quasar/extras/fontawesome-v5";
 
-export const getPermissionTree = (app) => {
-    return [
+export const permissionTree = [
         {
             label: "Администрирование",
-            id: app.PermissionSubject.administration,
+            id: PermissionSubject.administration,
             icon: fasUserSecret,
             // children: [
             //     {
@@ -24,59 +25,59 @@ export const getPermissionTree = (app) => {
         },
         {
             label: "Севооборот",
-            id: app.PermissionSubject.cropRotation,
+            id: PermissionSubject.cropRotation,
             icon: fasCropAlt,
             children: [
                 {
                     label: "Культура",
-                    id: app.PermissionSubject.crop,
+                    id: PermissionSubject.crop,
                     icon: fasSeedling,
                     children: [
                         {
                             label: "Просмотр",
-                            id: app.PermissionAction.read + app.PermissionSubject.crop,
+                            id: PermissionAction.read + PermissionSubject.crop,
                             icon: fasBookOpen
                         },
                         {
                             label: "Создание",
-                            id: app.PermissionAction.create + app.PermissionSubject.crop,
+                            id: PermissionAction.create + PermissionSubject.crop,
                             icon: fasPlusSquare
                         },
                         {
                             label: "Редактирование",
-                            id: app.PermissionAction.update + app.PermissionSubject.crop,
+                            id: PermissionAction.update + PermissionSubject.crop,
                             icon: fasPenSquare
                         },
                         {
                             label: "Удаление",
-                            id: app.PermissionAction.delete + app.PermissionSubject.crop,
+                            id: PermissionAction.delete + PermissionSubject.crop,
                             icon: fasTrashAlt
                         }
                     ]
                 },
                 {
                     label: "Вариант выращивания",
-                    id: app.PermissionSubject.grow,
+                    id: PermissionSubject.grow,
                     icon: fabNutritionix,
                     children: [
                         {
                             label: "Просмотр",
-                            id: app.PermissionAction.read + app.PermissionSubject.grow,
+                            id: PermissionAction.read + PermissionSubject.grow,
                             icon: fasBookOpen
                         },
                         {
                             label: "Создание",
-                            id: app.PermissionAction.create + app.PermissionSubject.grow,
+                            id: PermissionAction.create + PermissionSubject.grow,
                             icon: fasPlusSquare
                         },
                         {
                             label: "Редактирование",
-                            id: app.PermissionAction.update + app.PermissionSubject.grow,
+                            id: PermissionAction.update + PermissionSubject.grow,
                             icon: fasPenSquare
                         },
                         {
                             label: "Удаление",
-                            id: app.PermissionAction.delete + app.PermissionSubject.grow,
+                            id: PermissionAction.delete + PermissionSubject.grow,
                             icon: fasTrashAlt
                         }
                     ]
@@ -85,4 +86,3 @@ export const getPermissionTree = (app) => {
             ]
         }
     ]
-};

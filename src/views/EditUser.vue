@@ -8,15 +8,7 @@
     <div class="main-container">
         <div class="container-fluid">
             <div class="edit-form">
-                <h4>Редактирование пользователя</h4>
-                <div v-if="message"
-                    class="alert alert-danger alert-dismissible fade show"
-                >
-                    <span>{{ message }}</span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <h4>Редактирование пользователя</h4>                
                 <div class="mt-5 mb-3">
                         <q-input    
                             class="mb-3"                        
@@ -83,6 +75,7 @@ import User from "../models/user.model";
 
 import Sidebar from "../components/Sidebar";
 import Dropdown2 from "../components/Dropdown2.vue";
+import { notify } from '../plugins/notify';
 
 
 export default {
@@ -127,7 +120,6 @@ export default {
                 //     }
                 // ]
             },
-            message: null,
             role: null
         };
     },
@@ -169,7 +161,8 @@ export default {
         getUser(id) {
             UserService.getUser(id)
                 .then(res => {
-                    this.user = res.data;                   
+                    this.user = res.data; 
+                    this.getRoles();
                 })
                 .catch(error => {
                     console.error(error);
@@ -182,31 +175,30 @@ export default {
 
             UserService.updateUser(this.user)
                 .then(res => {
-                    if(res.data.result === this.ReqResult.success) {
+                    if(res.data.result === this.$NotifyType.success) {
                         this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Редактирование пользователя" });
                         this.$router.push({ name: "users" });
-                    } else if(res.data.result === this.ReqResult.error) {
-                        this.message = res.data.message;
+                    } else if(res.data.result === this.$NotifyType.error) {
+                        notify({ type: res.data.result, msg: res.data.message });
                     }
                 })
                 .catch(error => {
-                    this.message = error.response.data.message;
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 });
         },
         getRoles() {
             RoleService.getRoles().then(
                 res => {
                     this.roles = res.data;
-                    this.role = this.roles.find(role => role.value === this.user.roleId);
-                    console.log(this.role);
+                    this.role = this.roles.find(role => role.value === this.user.roleId);                    
                 },
                 error => {
-                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Получение списка ролей" };
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 }
             );
         },
@@ -216,7 +208,6 @@ export default {
     },
     mounted() {
         this.getUser(this.$route.params.id);
-        this.getRoles();
     }
 }
 </script>

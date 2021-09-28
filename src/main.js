@@ -1,18 +1,17 @@
 import { createApp } from 'vue'
-// import { router } from "./router.js";
-import { getRouter } from "./router.js";
-
-import App from './App.vue'
 
 import { initGlobals } from "./common/globals.js";
 
+import App from './App.vue'
+
+import { router } from "./router.js";
 // Auth
 import { store } from "./store";
 
 // // Quasar UI framework
-// import "quasar/dist/quasar.prod.css";
+import "quasar/dist/quasar.prod.css";
 // import "quasar/dist/icon-set/fontawesome-v5.umd.prod";
-import { Quasar, Notify } from "quasar";
+import { Quasar, Notify, Loading, Dialog } from "quasar";
 // import { Quasar } from "quasar";
 
 
@@ -38,9 +37,15 @@ import "./assets/tooltip.css";
 // FontAwesomeIcons
 import { FontAwesomeIcon } from "./plugins/font-awesome";
 
-const app = createApp(App);
+// const app = createApp(App);
 
 // app.config.productionTip = false; // ???
+
+import setupInterceptors from "./services/interceptors";
+
+setupInterceptors(store, router);
+
+const app = createApp(App);
 
 // globals
 initGlobals(app);
@@ -51,12 +56,9 @@ app.use(store);
 // quasar
 app.use(Quasar, {
     plugins: {
-        Notify
-    },
-    config: {
-        notify: {
-            type: "positive"
-        }
+        Notify,
+        Loading,
+        Dialog
     }
 });
 // app.use(Quasar);
@@ -68,7 +70,5 @@ app.directive("tooltip", tooltip);
 // app.component("ValidationProvider", ValidationProvider);
 app.component("font-awesome-icon", FontAwesomeIcon);
 
-// app.use(router);
-const router = getRouter(app.config.globalProperties.PermissionSubject, app.config.globalProperties.PermissionAction);
 app.use(router);
 app.mount("#app");

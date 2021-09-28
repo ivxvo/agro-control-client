@@ -10,15 +10,7 @@
     <div class="main-container">
         <div class="container-fluid">
             <div class="edit-form">
-                <h4>Добавление пользователя</h4>
-                <div v-if="message"
-                    class="alert alert-danger alert-dismissible fade show"
-                >
-                    <span>{{ message }}</span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <h4>Добавление пользователя</h4>                
                 <form @submit.prevent="handleRegister">
                     <div class="mt-5 mb-3">
                         <q-input    
@@ -80,6 +72,8 @@ import { required, email as pattern, minLength, maxLength } from "@vuelidate/val
 
 import User from "../models/user.model";
 
+import { notify } from '../plugins/notify';
+
 import AuthService from "../services/auth.service";
 import RoleService from "../services/role.service";
 
@@ -96,7 +90,6 @@ export default {
         return {
             v$: useVuelidate(),
             user: new User(),
-            message: null,
             roles: null,
             sidebar: {
                 header: {       
@@ -164,12 +157,12 @@ export default {
                     this.$router.push({ name: "users" });
                 },
                 error => {                   
-                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }                  
 
-                    this.message = error.response.data.message;
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 }
             );           
         },
@@ -179,12 +172,12 @@ export default {
                     this.roles = res.data;
                 },
                 error => {
-                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Получение списка ролей" };
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 }
             );
         },

@@ -33,8 +33,14 @@ export default {
     name: "Dropdown2DB",
     emits: ["item-selected"],
     props: {
-        getData: Function,
-        field: String,
+        getData: {
+            type: Function,
+            required: true
+        },
+        field: {
+            type: String,
+            required: true
+        },
         label: String,
         placeholder: String,        
         multiple: {

@@ -3,7 +3,7 @@
     <div class="left-menu">
         <div class="logo">
             <q-tooltip anchor="center right" self="center left">Начальная страница</q-tooltip>
-            <router-link to="/dashboards">
+            <router-link to="/dashboard">
                 <font-awesome-icon :icon="['fas', 'seedling']"/>
             </router-link>
         </div>
@@ -26,9 +26,9 @@
             <ul>
                 <li>
                     <q-tooltip anchor="center right" self="center left">Выйти из системы</q-tooltip>
-                    <router-link to="/login" @click="logout()">
+                    <button @click="logout()">
                         <font-awesome-icon :icon="['fas', 'power-off']"/>
-                    </router-link>
+                    </button>
                 </li>
             </ul>
         </div>            
@@ -40,6 +40,8 @@
 
 import AccessControl from "../components/AccessControl.vue";
 
+import { useQuasar } from "quasar";
+
 export default {
     name: "MainMenu", 
     components: {
@@ -47,6 +49,7 @@ export default {
     },
     data() {
         return {
+            $q: useQuasar(),
             selected: null,
             items:[
                 {
@@ -54,33 +57,46 @@ export default {
                     tooltip: "Администрирование",
                     path: "/admin/users",
                     img: ["fas", "user-secret"],
-                    permission: this.PermissionSubject.administration
+                    permission: this.$PermissionSubject.administration
                 },
                 {
                     name: "cropRotationMenuItem",
                     tooltip: "Севооборот",
                     path: "/crop-rotation",
                     img: ["fas", "crop-alt"],
-                    permission: this.PermissionSubject.crop + this.PermissionAction.read
+                    permission: this.$PermissionSubject.crop + this.$PermissionAction.read
                 },
                 
             ]
         }
     },
     computed: {
-        loggedIn() {
-            return this.$store.state.auth.status.loggedIn;
-        },
         currentPath() {
             return this.$route.path.split("/")[1];            
         }
     },
     methods: {
-        logout() {
-            this.$store.dispatch("auth/logout");
-            // this.deselect();           
-
-            // this.$router.push("/login");
+        logout() {            
+            this.$q.dialog({
+                title: "Подтверждение",
+                message: "Желаете выйти из системы?",
+                persistent: true,
+                ok: {
+                    label: "Выйти",
+                    color: "light-blue-7",
+                    // "text-color": "light-blue-1",
+                    "no-caps": true
+                },
+                cancel: {
+                    label: "Отмена",
+                    color: "grey-1",
+                    "text-color": "blue-grey-10",
+                    "no-caps": true
+                },
+            }).onOk(() => {
+                this.$store.dispatch("auth/logout");
+                this.$router.push("/login");
+            });
         }
     }
 }
@@ -139,11 +155,12 @@ export default {
     }
 
     .left-menu .menu-items a,
-    .left-menu .logout a {
+    .left-menu .logout button {
         padding: 5px 3px;
         width: 45px;
         height: 45px;
         border-radius: 25px;
+        border: none;
         display: inline-block;
         background: #fff;
         color: var(--color-dark-gray);
@@ -152,22 +169,23 @@ export default {
     }
 
     .left-menu .menu-items li a:hover,
-    .left-menu .logout li a:hover {
+    .left-menu .logout li button:hover {
         background: var(--color-gray);
         color: var(--color-black);
     }
 
-    .left-menu .menu-items li a svg,
-    .left-menu .logout li a svg {
+    .left-menu .menu-items li a svg
+    /* ,.left-menu .logout li button svg  */
+    {
         transform: scale(1);
-        position: relative;
-        left: 1px;
-        top: 0px;
+        /* position: relative; */
+        /* left: 1px;
+        top: 0px; */
         vertical-align: middle;
     }
 
     .left-menu .menu-items li a:hover svg,
-    .left-menu .logout li a:hover svg {
+    .left-menu .logout li button:hover svg {
         transform: scale(1.2);
     }
 
@@ -197,6 +215,6 @@ export default {
 
     .left-menu .menu-items {
         height: calc(100vh - 150px);
-    }
+    }    
 
 </style>

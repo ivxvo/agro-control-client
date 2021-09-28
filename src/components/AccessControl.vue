@@ -1,10 +1,10 @@
 <script>
+/* https://dev.to/umarov/easy-access-control-in-your-vue-apps-hhp */
     
     import { store } from "../store";
 
     const AccessControl = (props, context) => {
-        console.log(store);
-        if(store.state.auth.user.permissions.includes(props.subject + props.action)) {
+        if(store.getters["auth/checkPermission"](props.subject + props.action)) {
             return context.slots.default();
         }
     };

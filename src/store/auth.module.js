@@ -1,15 +1,22 @@
 import AuthService from "../services/auth.service";
 
 const user = JSON.parse(localStorage.getItem("user"));
-const initialState = user ? { status: { loggedIn: true }, user } 
-                          : { status: { loggedIn: false }, user: null };
+const initialState = user ?
+    {
+        status: { loggedIn: true },
+        user 
+    } :
+    {
+        status: { loggedIn: false },
+        user: null 
+    };
 
 export const auth = {
     namespaced: true,
     state: initialState,
     actions: {
-        login({ commit }, user) {
-            return AuthService.login(user).then(
+        login({ commit }, params) {
+            return AuthService.login(params).then(
                 user => {
                     commit("loginSuccess", user);
                     return Promise.resolve(user);
@@ -24,17 +31,19 @@ export const auth = {
             AuthService.logout();
             commit("logout");
         },
-        // register({ commit }, user) {
-        //     return AuthService.register(user).then(
-        //         res => {
-        //             commit("registerSuccess");
-        //             return Promise.resolve(res.data);
-        //         },
-        //         error => {
-        //             commit("registerFailure");
-        //             return Promise.reject(error);
-        //         }
-        //     );
+        verify({ commit }) {
+            return AuthService.verify().then(
+                user => {
+                    commit("refreshUser", user);
+                },
+                error => {
+                    commit("logout");
+                    return Promise.reject(error);
+                }
+            );
+        },
+        // refreshToken({ commit }, accessToken) {
+        //     commit("refreshToken", accessToken);
         // }
     },
     mutations: {
@@ -50,11 +59,20 @@ export const auth = {
             state.status.loggedIn = false;
             state.user = null;
         },
-        // registerSuccess(state) {
-        //     state.status.loggedIn = false;
-        // },
-        // registerFailure(state) {
-        //     state.status.loggedIn = false;
+        refreshUser(state, user) {
+            state.user.username = user.username;
+            state.user.email = user.email;
+            state.user.role = user.role;
+            state.user.permissions = user.permissions;
+        },
+        // refreshToken(state, accessToken) {
+        //     state.status.loggedIn = true;
+        //     state.user.accessToken = accessToken;
         // }
+    },
+    getters: {
+        checkPermission: state => permission => {
+            return state.user.permissions.includes(permission);
+        }
     }
 };

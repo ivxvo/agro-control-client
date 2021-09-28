@@ -13,7 +13,7 @@
                     Удалить пользователя '{{ selectedUser.username }}' ?
                 </template>
                 <template v-slot:footer>
-                    <button class="btn btn-danger" @click="deleteUser(selectedUser.id)">
+                    <button class="btn btn-danger" @click="deleteUser(selectedUser)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                         Удалить
                     </button>
@@ -31,18 +31,7 @@
             </div>           
 
             <div class="row">
-                <div class="col-md-12">
-                    <div v-show="userAlert.result"
-                        class="alert alert-dismissible fade show"
-                        :class="{ 'alert-success': userAlert.result === ReqResult.success, 'alert-danger': userAlert.result === ReqResult.error }"
-                    >
-                        <h5>{{ userAlert.caption }}</h5>
-                        <span>{{ userAlert.message }}</span>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>                   
-
+                <div class="col-md-12">                                       
                     <Grid
                         :data="users"
                         :pages="pages"
@@ -139,6 +128,8 @@ import User from '../models/user.model';
 import DropdownSearch from "../models/dropdownSearch.model";
 
 import UserService from "../services/user.service";
+
+import { notify } from "../plugins/notify";
 
 import Grid from "../components/Grid.vue";
 import Sidebar from "../components/Sidebar.vue";
@@ -256,6 +247,11 @@ export default {
             return this.$store.state.alert;
         }
     },
+    watch: {
+        userAlert(alert) {
+            notify({ type: alert.result, msg: alert.message });
+        }
+    },
     methods: {
         // onFilterTyped(typedValue) {
         //     if(typedValue.length >= 3) {
@@ -300,34 +296,32 @@ export default {
                     this.pages.current = res.data.currentPage;
                 },
                 error => {                 
-                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение пользователей" });
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 }                
             );
         },
-        deleteUser(userId) {
-            if(userId) {
-                UserService.deleteUser(userId)
+        deleteUser(user) {
+            UserService.deleteUser(user)
                 .then(res => {
-                    this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Удаление пользователя" });
+                    notify({ type: res.data.result, msg: res.data.message });
                 })
                 .catch(error => {                                       
-                    if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Удаление пользователя" });
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 })
                 .finally(() => {
                     this.showModal = false;
                     this.getUsers();
                 });
-            }
         },
         showModalWindow(user) {
             this.showModal = true;
@@ -340,12 +334,12 @@ export default {
                     this.$store.commit("dropdown/setDropdownData", res.data);                   
                 },
                 error => {
-                     if(error.response && error.response.status === this.HttpStatus.Unauthorized) {
+                     if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
                         this.$store.dispatch("auth/logout");
                         this.$router.push({ name: "login" });
                     }
 
-                    this.$store.commit("alert/setAlert", { result: error.response.data.result, message: error.response.data.message, caption: "Получение атрибута фильтрации" });
+                    notify({ type: error.response.data.result, msg: error.response.data.message });
                 }
             );
 
@@ -353,6 +347,9 @@ export default {
     },
     mounted() {
         this.getUsers();
+        if(this.$store.state.alert.result) {
+            notify({ type: this.$store.state.alert.result, msg: this.$store.state.alert.message });
+        }
     },
     unmounted() {
         this.$store.commit("alert/resetState");

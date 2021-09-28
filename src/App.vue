@@ -1,25 +1,31 @@
 <template> 
 
   <div id="app">
-    
-    <MainMenu v-if="loggedIn"></MainMenu>
 
-    <div :class="{ 'wrap': loggedIn }">      
+    <div v-if="loggedIn"> 
 
-      <div :class="{ 'main-container-wrap': loggedIn, 'main-container-wrap-showed-sidebar': showedSidebar }">      
+      <MainMenu/>
 
-        <div class="row" v-show="loggedIn">
-          <div class="col-md-7">
-            <div class="search-input">
-              <input type="text" placeholder="Поиск..">
+      <div class="wrap">      
+        <div class="main-container-wrap" :class="{ 'main-container-wrap-showed-sidebar': showedSidebar }">      
+
+          <!-- <div class="row">
+            <div class="col-md-7">
+              <div class="search-input">
+                <input type="text" placeholder="Поиск..">
+              </div>
             </div>
-          </div>
-          <div class="col-md-5"></div>
-        </div>
+            <div class="col-md-5"></div>
+          </div> -->
 
-          <router-view />          
-          
+            <router-view />          
+            
+        </div>
       </div>
+    </div>
+
+    <div v-else-if="$route.path === '/login'">
+      <router-view/>
     </div>
 
   </div>

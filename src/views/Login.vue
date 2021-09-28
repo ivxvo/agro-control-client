@@ -70,8 +70,11 @@
 import useVuelidate from "@vuelidate/core";
 import { required, minLength, maxLength } from "@vuelidate/validators";
 
+import { getFingerPrint } from "../common/fingerPrint";
+
 import User from "../models/user.model";
 
+import { notify } from "../plugins/notify";
 import { fasExclamationCircle } from "@quasar/extras/fontawesome-v5";
 
 export default {
@@ -121,26 +124,34 @@ export default {
     },
     created() {
         if(this.loggedIn) {
-            this.$router.push('/dashboards');
+            this.$router.push('/dashboard');
         }
     },
     methods: {
-        handleLogin() {            
+        async handleLogin() {            
             this.v$.$touch();
             if(this.v$.$error) return;
 
             if(this.user.username && this.user.password) {
-                this.$store.dispatch("auth/login", this.user).then(
+                const fingerPrint = await getFingerPrint()
+                this.$store.dispatch("auth/login", { ...this.user, fingerPrint }).then(
                     () => {                            
-                        this.$router.push("/dashboards");
+                        this.$router.push("/dashboard");
                     },
                     error => {
                         this.loading = false;
-                        if(error.status == this.HttpStatus.NotFound) {
-                            this.message = `Пользователь '${this.user.username}' не найден`;
-                        } else {
-                            this.message = error.message;
-                        }
+                        // if(error.status == this.HttpStatus.NotFound) {
+                        //     this.message = `Пользователь '${this.user.username}' не найден`;
+                        // } else {
+                        //     this.message = error.message;
+                        // }
+                        notify({
+                            app: this,
+                            type: error.result,
+                            msg: error.message,
+                            pos: "bottom"
+                        });
+
                     }
                 )
             }

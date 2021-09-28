@@ -13,7 +13,7 @@ export default {
     name: "Home",
     data() {
         return {
-            content: "Заголовок",
+            content: "Севооборот",
             $q: useQuasar()
         };
     },
