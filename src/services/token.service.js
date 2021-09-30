@@ -17,6 +17,8 @@ class TokenService {
         user.accessToken = tokens.accessToken;
         user.expiryDate = tokens.expiryDate;
         user.refreshToken = tokens.refreshToken;
+
+        localStorage.setItem("user", JSON.stringify(user));
     }
 }
 

@@ -1,25 +1,38 @@
 import axiosInstance from "./api";
 import TokenService from "./token.service";
+import { getFingerPrint } from "../common/fingerPrint";
+
 import { Loading, QSpinnerGrid } from "quasar";
 import { notify } from "../plugins/notify";
 import { HttpStatus } from "../common/globals";
 
 const selfNotify = ["/auth/signin"];
-const urlRefreshSession = "auth/refreshsession";
+function checkIsSelfNotified(url) {
+    return selfNotify.includes(url);
+}
+
+const urlRefreshSession = "/auth/refreshsession";
+function checkIsRefresh(url) {
+    return urlRefreshSession === url;
+}
 
 const setup = (store, router) => {
     axiosInstance.interceptors.request.use(
         async config => {
             let token = TokenService.getLocalAccessToken();
-            const isRefresh = config.url === urlRefreshSession;
 
-            if(token?.accessToken && !isRefresh) {
+            if(checkIsRefresh(config.url)) {
+                const refreshConfig = config;
+                refreshConfig.isRefresh = true;
+                return refreshConfig;
+            } else if(token.accessToken) {
                 const verifyDate = (new Date()).getTime() + 10000;
 
                 if(token.expiryDate < verifyDate) {  
                     try {          
                         const res = await axiosInstance.post(urlRefreshSession, {
-                            refreshToken: TokenService.getLocalRefreshToken()
+                            refreshToken: TokenService.getLocalRefreshToken(),
+                            fingerPrint: await getFingerPrint()
                         });
 
                         TokenService.updateLocalTokens(res.data);
@@ -42,23 +55,30 @@ const setup = (store, router) => {
 
     axiosInstance.interceptors.response.use(
         res => {
-            const isSelfNotify = selfNotify.includes(res.config.url);
-            if(res.data.message && !isSelfNotify) {
+            if(res.data.message && !checkIsSelfNotified(res.config.url)) {
                 notify({ type: res.data.result, msg: res.data.message });
             }
             return res;
         },
         err => {
-            if(err.response?.status === HttpStatus.Unauthorized) {
-                showLoading({ message: err.response.data.message }).then(
-                   () => {
-                        store.dispatch("auth/logout");
-                        router.push("/login");
-                   }
-                );
+            if(err.config.isRefresh) {
+                err.config.isRefresh = false;
+                return Promise.reject(err);
             }
-
-            return Promise.reject(err);
+            else if(!checkIsSelfNotified(err.config.url)) {
+                if(err.response?.status === HttpStatus.Unauthorized) {
+                    showLoading({ message: err.response.data.message }).then(
+                    () => {
+                            store.dispatch("auth/logout");
+                            router.push("/login");
+                        }
+                    );
+                } else {
+                    notify({ type: err.response.data.result, msg: err.response.data.message });
+                }           
+            } else {
+                return Promise.reject(err);
+            }
         }
     );
 };
@@ -70,7 +90,7 @@ function showLoading(params) {
         message: params.message
     });
 
-    return new Promise(resolve => {
+    return new Promise(resolve => {        
         setTimeout(() => {
             Loading.hide();
             resolve();
