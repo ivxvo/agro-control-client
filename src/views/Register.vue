@@ -72,8 +72,6 @@ import { required, email as pattern, minLength, maxLength } from "@vuelidate/val
 
 import User from "../models/user.model";
 
-import { notify } from '../plugins/notify';
-
 import AuthService from "../services/auth.service";
 import RoleService from "../services/role.service";
 
@@ -155,30 +153,14 @@ export default {
                 res => {                  
                     this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Добавление пользователя" });
                     this.$router.push({ name: "users" });
-                },
-                error => {                   
-                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }                  
-
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                }
+                }, () => {}
             );           
         },
         getRoles() {
             RoleService.getRoles().then(
                 res => {
                     this.roles = res.data;
-                },
-                error => {
-                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }
-
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                }
+                }, () => {}
             );
         },
         onItemSelected(field, value) {

@@ -1,9 +1,4 @@
-// import axios from "axios";
-// import { authHeader } from "./auth-header";
-
 import api from "./api";
-
-// const API_URL = "http://localhost:8080/api/auth/";
 
 class AuthService {
     login(params) {

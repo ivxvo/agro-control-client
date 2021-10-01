@@ -100,30 +100,13 @@ export default {
                         text: "Все пользователи",
                         img: ["fas", "angle-left"],
                         path: "/admin/users"
-                }
-                ,
-                items: null
-                // [                                
-                //     {
-                //         name: "addUserSidebarItem",
-                //         text: "Добавить пользователя",
-                //         img: "fas fa-user-plus",
-                //         path: "/register",
-                //         parent: "adminMenuItem"
-                //     },
-                //     {
-                //         name: "rolesSidebarItem",
-                //         text: "Роли",
-                //         img: "fas fa-user-tag",
-                //         path: "",
-                //         parent: "adminMenuItem"                    
-                //     }
-                // ]
+                },
+                items: null                
             },
             role: null
         };
     },
-     validations () {
+    validations () {
         return {
             user: {
                 username: { required, minLength:minLength(3), maxLength:maxLength(20) },
@@ -159,47 +142,34 @@ export default {
     },
     methods: {
         getUser(id) {
-            UserService.getUser(id)
-                .then(res => {
+            UserService.getUser(id).then(
+                res => {
                     this.user = res.data; 
                     this.getRoles();
-                })
-                .catch(error => {
-                    console.error(error);
-
-                });
+                }, () => {}
+            );
         },
         updateUser() {      
             this.v$.$touch();
             if(this.v$.$error) return;
 
-            UserService.updateUser(this.user)
-                .then(res => {
+            UserService.updateUser(this.user).then(
+                res => {
                     if(res.data.result === this.$NotifyType.success) {
                         this.$store.commit("alert/setAlert", { result: res.data.result, message: res.data.message, caption: "Редактирование пользователя" });
                         this.$router.push({ name: "users" });
                     } else if(res.data.result === this.$NotifyType.error) {
                         notify({ type: res.data.result, msg: res.data.message });
                     }
-                })
-                .catch(error => {
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                });
+                }, () => {}
+            );
         },
         getRoles() {
             RoleService.getRoles().then(
                 res => {
                     this.roles = res.data;
                     this.role = this.roles.find(role => role.value === this.user.roleId);                    
-                },
-                error => {
-                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }
-
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                }
+                }, () => {}
             );
         },
         onItemSelected(field, value) {

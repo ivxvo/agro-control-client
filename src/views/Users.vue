@@ -8,7 +8,10 @@
 
     <div class="main-container">
         <div class="container-fluid">
-            <Modal v-if="showModal">
+            <Modal v-if="showModal" @close="showModal = false">
+                <template v-slot:header>
+                    <h5>Удаление пользователя</h5>
+                </template>
                 <template v-slot:body>
                     Удалить пользователя '{{ selectedUser.username }}' ?
                 </template>
@@ -294,30 +297,14 @@ export default {
                     this.users.items = res.data.pagingItems;
                     this.pages.count = res.data.countPages;
                     this.pages.current = res.data.currentPage;
-                },
-                error => {                 
-                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }
-
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                }                
+                }, () => {}
             );
         },
         deleteUser(user) {
             UserService.deleteUser(user)
                 .then(res => {
                     notify({ type: res.data.result, msg: res.data.message });
-                })
-                .catch(error => {                                       
-                    if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }
-
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                })
+                }, () => {})
                 .finally(() => {
                     this.showModal = false;
                     this.getUsers();
@@ -332,15 +319,7 @@ export default {
             UserService.getFilteredUserProperty(params).then(
                 res => {
                     this.$store.commit("dropdown/setDropdownData", res.data);                   
-                },
-                error => {
-                     if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                        this.$store.dispatch("auth/logout");
-                        this.$router.push({ name: "login" });
-                    }
-
-                    notify({ type: error.response.data.result, msg: error.response.data.message });
-                }
+                }, () => {}
             );
 
         }

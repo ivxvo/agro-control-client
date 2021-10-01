@@ -183,14 +183,7 @@
                     res => {
                         notify({ type: res.data.result, msg: res.data.message });
                         this.getRoles();
-                    },
-                    error => {
-                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                            this.$store.dispatch("auth/logout");
-                            this.$router.push({ name: "login" });
-                        }
-                        notify({ type: error.response.data.result, msg: error.response.data.message });
-                    }
+                    }, () => {}
                 );
                 this.creatingRole = new Role();
                 this.showModalAddRole = false;
@@ -200,15 +193,7 @@
                     res => {
                         notify({ type: res.data.result, msg: res.data.message });
                         this.getRoles();
-                    },
-                    error => {
-                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                            this.$store.dispatch("auth/logout");
-                            this.$router.push({ name: "login" });
-                        }
-
-                        notify({ type: error.response.data.result, msg: error.response.data.message });
-                    }
+                    }, () => {}
                 );
 
                 this.showModalEditRole = false;
@@ -218,15 +203,7 @@
                     res => {
                         notify({ type: res.data.result, msg: res.data.message });
                         this.getRoles();
-                    },
-                    error => {
-                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                            this.$store.dispatch("auth/logout");
-                            this.$router.push({ name: "login" });
-                        }
-
-                        notify({ type: error.response.data.result, msg: error.response.data.message });
-                    }
+                    }, () => {}
                 );
 
                 this.showModalEditRole = false;
@@ -243,15 +220,7 @@
                 RoleService.getRoles(params).then(
                     res => {
                         this.roles = res.data;
-                    },
-                    error => {
-                        if(error.response && error.response.status === this.$HttpStatus.Unauthorized) {
-                            this.$store.dispatch("auth/logout");
-                            this.$router.push({ name: "login" });
-                        }
-
-                        this.roleAlert = { result: error.response.data.result, message: error.response.data.message, caption: "Получение списка ролей" };
-                    }
+                    }, () => {}
                 );
             },
             getFilteredRoleProperty(params) {

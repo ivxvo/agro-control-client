@@ -15,10 +15,10 @@ export const routes = [
             name: "login",
             component: () => import("./views/Login.vue")
         }, 
-        // {
-        //     path: "/admin",
-        //     redirect: "/admin/users"
-        // },    
+        {
+            path: "/admin",
+            redirect: "/admin/users"
+        },    
         {
             path: "/admin/users",
             name: "users",

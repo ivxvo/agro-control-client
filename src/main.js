@@ -37,13 +37,11 @@ import "./assets/tooltip.css";
 // FontAwesomeIcons
 import { FontAwesomeIcon } from "./plugins/font-awesome";
 
-// const app = createApp(App);
-
 // app.config.productionTip = false; // ???
 
 import setupInterceptors from "./services/interceptors";
 
-setupInterceptors(store, router);
+setupInterceptors();
 
 const app = createApp(App);
 

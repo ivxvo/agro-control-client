@@ -1,28 +1,25 @@
-import axios from "axios";
-import { authHeader } from "./auth-header";
-
-const API_URL = "http://localhost:8080/api/";
+import api from "./api";
 
 class RoleService {
     
     getRoles(params) {
-        return axios.get(API_URL + "admin/roles", { params, headers: authHeader() });            
+        return api.get("/admin/roles", { params });            
     }
     
     addRole(role) {
-        return axios.post(API_URL + "admin/role", role, { headers: authHeader() });
+        return api.post("/admin/role", role);
     }
     
     updateRole(role) {
-        return axios.put(API_URL + `admin/role/${role.id}`, role, { headers: authHeader() });
+        return api.put(`/admin/role/${role.id}`, role);
     }
 
     deleteRole(params) {
-        return axios.delete(API_URL + `admin/role/${params.id}`, { params, headers: authHeader() });
+        return api.delete(`/admin/role/${params.id}`, { params });
     }
 
     getFilteredRoleProperty(params) {
-        return axios.get(API_URL + "admin/roles/filtered", { params, headers: authHeader() });            
+        return api.get("/admin/roles/filtered", { params });            
     }
 }
 

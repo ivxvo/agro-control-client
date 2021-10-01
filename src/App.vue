@@ -33,14 +33,20 @@
 </template>
 
 <script>
-
+import EventBus from "./common/eventBus";
 import MainMenu from "./components/MainMenu";
+import { useQuasar, QSpinnerGrid } from "quasar";
 
 export default {
   name: "App",
   components: {
     MainMenu
   },  
+  data() {
+    return {
+      $q: useQuasar()
+    }
+  },
   computed: {
     currentUser() {
       return this.$store.state.auth.user;
@@ -50,12 +56,35 @@ export default {
     },
     showedSidebar() {
       return this.$store.state.menu.showedSidebar;
+    }    
+  },
+  methods: {
+    showLoading(params) {
+        this.$q.loading.show({
+            spinner: QSpinnerGrid,
+            spinnerColor: "light-blue-7",
+            message: params.message
+        });
+
+        return new Promise(resolve => {        
+            setTimeout(() => {
+                this.$q.loading.hide();
+                resolve();
+            }, 5000);
+        });
     }
   },
   mounted() {
-    if(!this.loggedIn) {
-      this.$router.push({ name: "login" });
-    }    
+    EventBus.on("logout", (message) => {
+        this.showLoading({ message }).then(() => {
+          this.$store.dispatch("auth/logout");
+          this.$router.push("/login");
+        }
+      )
+    });    
+  },
+  beforeUnmount() {
+    EventBus.remove("logout");
   }
 };
 

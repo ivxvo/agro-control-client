@@ -231,8 +231,16 @@ ul {
     margin: 0;
 }
 
-.q-tree>.q-tree__node--child>.q-tree__node-header {
+/* .q-tree>.q-tree__node--child>.q-tree__node-header {
     padding-left: 1.55rem;
+} */
+
+.q-tree .q-tree__node--child {
+    padding: 0 0 3px 17px;
+}
+
+.q-tree .q-tree__node--child .q-tree__node-header:before {
+    left: -30px;
 }
 
 /*////////////////////////////////////*/

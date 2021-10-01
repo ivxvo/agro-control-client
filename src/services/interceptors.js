@@ -2,9 +2,9 @@ import axiosInstance from "./api";
 import TokenService from "./token.service";
 import { getFingerPrint } from "../common/fingerPrint";
 
-import { Loading, QSpinnerGrid } from "quasar";
 import { notify } from "../plugins/notify";
 import { HttpStatus } from "../common/globals";
+import EventBus from "../common/eventBus";
 
 const selfNotify = ["/auth/signin"];
 function checkIsSelfNotified(url) {
@@ -16,7 +16,7 @@ function checkIsRefresh(url) {
     return urlRefreshSession === url;
 }
 
-const setup = (store, router) => {
+const setup = () => {
     axiosInstance.interceptors.request.use(
         async config => {
             let token = TokenService.getLocalAccessToken();
@@ -66,36 +66,16 @@ const setup = (store, router) => {
                 return Promise.reject(err);
             }
             else if(!checkIsSelfNotified(err.config.url)) {
-                if(err.response?.status === HttpStatus.Unauthorized) {
-                    showLoading({ message: err.response.data.message }).then(
-                    () => {
-                            store.dispatch("auth/logout");
-                            router.push("/login");
-                        }
-                    );
+                if(err.response?.status === HttpStatus.Unauthorized) {                    
+                    EventBus.dispatch("logout", err.response.data.message);
                 } else {
                     notify({ type: err.response.data.result, msg: err.response.data.message });
                 }           
-            } else {
-                return Promise.reject(err);
             }
+
+            return Promise.reject(err);            
         }
     );
 };
-
-function showLoading(params) {
-    Loading.show({
-        spinner: QSpinnerGrid,
-        spinnerColor: "light-blue-7",
-        message: params.message
-    });
-
-    return new Promise(resolve => {        
-        setTimeout(() => {
-            Loading.hide();
-            resolve();
-        }, 5000);
-    });
-}
 
 export default setup;

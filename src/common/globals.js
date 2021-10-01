@@ -19,7 +19,9 @@ const PermissionSubject = Object.freeze({
     fields: 2,
     cropRotation: 3,
     crop: 4,
-    grow: 5
+    grow: 5,
+    car: 6,
+    accountList: 7
 });
 
 const PermissionAction = Object.freeze({

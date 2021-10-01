@@ -7,33 +7,13 @@
 </template>
 
 <script>
-import { useQuasar } from "quasar";
 
 export default {
     name: "Home",
     data() {
         return {
-            content: "Севооборот",
-            $q: useQuasar()
+            content: "Севооборот"
         };
-    },
-    methods: {
-        
-    },
-    mounted() {
-        // this.$store.commit("menu/showSidebar", false);
-        // console.log(`show: ${this.$store.state.menu.showedSidebar}`);
-
-        // UserService.getPublicContent().then(
-        //     res => {
-        //         this.content = res.data;
-        //     },
-        //     error => {
-        //         this.content = (error.response && error.response.data) ||
-        //         error.message ||
-        //         error.toString();
-        //     }
-        // );
     }
 };
 </script>

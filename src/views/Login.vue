@@ -140,11 +140,6 @@ export default {
                     },
                     error => {
                         this.loading = false;
-                        // if(error.status == this.HttpStatus.NotFound) {
-                        //     this.message = `Пользователь '${this.user.username}' не найден`;
-                        // } else {
-                        //     this.message = error.message;
-                        // }
                         notify({
                             app: this,
                             type: error.result,
